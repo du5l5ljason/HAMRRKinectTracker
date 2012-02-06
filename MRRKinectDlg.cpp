@@ -10,10 +10,10 @@
 #include "windows.h"
 #include "time.h"
 #include <stdio.h>
-
+#include <iostream>
 #include <ctime>
 
-
+using namespace std;
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
@@ -22,7 +22,8 @@
 bool g_RunKinect = true;
 HANDLE g_hKinectThread;
 extern int gnPointMode;
-int gnSystemStatus = 0;
+int gnSystemStatus = 2;
+
 //Edited by Tingfang, 10/31/2011
 
 // CAboutDlg dialog used for App About
@@ -62,7 +63,10 @@ CMRRKinectDlg::CMRRKinectDlg(CWnd* pParent /*=NULL*/)
 	: CDialogEx(CMRRKinectDlg::IDD, pParent)
 {
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
-
+	m_pHandTracker = new HandTrackMeanShift(640,480);
+	m_pImgProc = new ImageProc;
+	m_pModel = new ColorModel;
+	m_pCalib = new KinectCalibration;
 }
 
 void CMRRKinectDlg::DoDataExchange(CDataExchange* pDX)
@@ -82,6 +86,7 @@ BEGIN_MESSAGE_MAP(CMRRKinectDlg, CDialogEx)
 	ON_WM_MOUSEMOVE()
 	ON_BN_CLICKED(IDC_BUTTON_TRACK, &CMRRKinectDlg::OnBnClickedButtonTrack)
 	ON_BN_CLICKED(IDC_BUTTON_RESET, &CMRRKinectDlg::OnBnClickedButtonReset)
+	ON_BN_CLICKED(IDC_BUTTON_SETMODEL, &CMRRKinectDlg::OnBnClickedButtonSetmodel)
 END_MESSAGE_MAP()
 
 
@@ -249,12 +254,13 @@ DWORD WINAPI ShowStreams(LPVOID lpParam) {
 	wb = kinect->getRGBImg()->widthBytes();
 
 	//Test code: Edited by Tingfang 10/28
-	//fullWnd->ShowImg(w,h,wb,dlg->getHandTracker()->getImg()->getData());
+	fullWnd->ShowImg(w,h,wb,kinect->getRGBImg()->getData());
 	//fullWnd->ShowImg(w,h,wb,dlg->getBG()->getRgbBG()->getData());
-	fullWnd->ShowImg(w, h, wb, kinect->getRGBImg()->getData());
+
+	//fullWnd->ShowImg(w, h, wb, dlg->getHandTracker()->getImg()->getData());
 	//Test Code ends
 	fullWnd->showSkeleton(dlg->getSkeleton()->getJointPos());
-	fullWnd->showHandJoint(dlg->getHandTracker()->getRightHandPos());
+	fullWnd->showHandJoint(dlg->getHandTracker()->getHandPos());
 	
 	fullWnd->Invalidate();
 	
@@ -265,34 +271,44 @@ DWORD WINAPI KinectThread(LPVOID lpParam) {
 	CMRRKinectDlg* dlg = (CMRRKinectDlg*)(lpParam);
 	KinectOpenNI* kinect = dlg->getKinect();
 	Background* bg = dlg->getBG();
-	HandTrackMarker* handTrack = dlg->getHandTracker();
+	HandTrackMeanShift* handTrack = dlg->getHandTracker();
 	KinectSkeletonOpenNI* skeleton = dlg->getSkeleton();
 	
 	//for debug, time duration per frame
 	clock_t t_start, t_finish;
-	int nStartX = 0;
-	int nStartY = 0;
+	//debug code ends
+	int nCenterX = 0;
+	int nCenterY = 0;
+
 	while(g_RunKinect) {
-		t_start = clock();
+
+		t_start = clock();		//debug code
 		kinect->update();
+
 		switch(gnSystemStatus){
 			case _SS_REST: break;
 			case _SS_CALIB: dlg->getCalibration()->Calibrate(kinect->getRGBImg(),kinect->getDepthImg(), kinect->getDepthGenerator());break;
 			case _SS_TRACK:	
 				{
-					skeleton->update();
 					if(!bg->isBG())
 					{
-						bg->init(kinect->getRGBImg(), kinect->getDepthImg());
+						bg->init(kinect->getRGBImg(), kinect->getDepthImg()); //将背景文件拷进去
 					}
-		
-					nStartX = skeleton->getJointPosAt(_JOINT_RHAND).x;
-					nStartY = skeleton->getJointPosAt(_JOINT_RHAND).y;
+
+					skeleton->update();
+					nCenterX = skeleton->getJointPosAt(_JOINT_RHAND).x;
+					nCenterY = skeleton->getJointPosAt(_JOINT_RHAND).y;
 					if(gnPointMode==2)
 					{
-						nStartX = dlg->getHandTracker()->getRightHandPos().x;
-						nStartY = dlg->getHandTracker()->getRightHandPos().y;
+						nCenterX = dlg->getHandTracker()->getHandPos().x;		//Last frame position
+						nCenterY = dlg->getHandTracker()->getHandPos().y;
 					}
+
+					//Comment: 2/2/2012
+					//We need to first use the skeleton hand position, 
+					//if the mean shift algorithm can successfully get a hand position, we use last frame position
+					//if not, we return to use skeleton hand position.
+					//How to determine this? calculate the BHattya distance, if the BD of the convergent point is lower than a threshold, we return success; else return false
 					if( bg->isBG() && skeleton->update() )
 					{
 						handTrack->track(						
@@ -300,38 +316,40 @@ DWORD WINAPI KinectThread(LPVOID lpParam) {
 							kinect->getDepthImg(),
 							bg->getRgbBG(),
 							bg->getDepthBG(),
-							nStartX,			//Modified later
-							nStartY,
-							60,
-							60,
-							true
+							nCenterX,			//Modified later
+							nCenterY,
+							ROI_SIZE_W,
+							ROI_SIZE_H
 						);
+						//POINT3D p3DHandPos = dlg->getCalibration()->cvtIPtoGP(dlg->getHandTracker()->getHandPos(),kinect->getDepthGenerator());
+						//cout << "HandPosition in L frame Coordinate: (X,Y,Z) = " << p3DHandPos.x << ", " << p3DHandPos.y << ", " << p3DHandPos.z << endl;
+						//Should be moved to the tracking module
 					}
+
 					break;
 				}
 		}
+		//debug code
 
-		t_finish = clock();
-		CString str;
-		str.Format(_T("%f"), (double)(t_finish-t_start)/CLOCKS_PER_SEC);
-		//dlg->SetDlgItemText(IDC_EDIT7, str);
+	
 
 		HANDLE hShowStreams = CreateThread(NULL, 0, ShowStreams, dlg, 0, NULL);
 		WaitForSingleObject(hShowStreams, INFINITE);
+		t_finish = clock();
+		CString str;
+		str.Format(_T("%f"), (double)(t_finish-t_start)/CLOCKS_PER_SEC);
+		dlg->SetDlgItemText(IDC_EDIT7, str);
 	}
 	return 0;
 }
 
 void CMRRKinectDlg::InitKinect() {
 	kinect.init();
-	m_pSkeleton = new KinectSkeletonOpenNI(kinect.getContext(), kinect.getDepthGenerator(), 24);
 	int nWidth = kinect.getRGBImg()->width();
 	int nHeight = kinect.getRGBImg()->height(); 
-	m_pHandTracker = new HandTrackMarker(nWidth, nHeight);
 	m_pBG = new Background(nWidth,nHeight);	//Is it good to put it here?
-	m_pImgProc = new ImageProc;
-	m_pModel = new MarkerModel;
-	m_pCalib = new KinectCalibration;
+	m_pSkeleton = new KinectSkeletonOpenNI(kinect.getContext(), kinect.getDepthGenerator(), 24);
+	
 	kinect.open();
 
 	g_hKinectThread = CreateThread(NULL, 0, KinectThread, this, 0, NULL);
@@ -570,4 +588,12 @@ void CMRRKinectDlg::OnBnClickedButtonReset()
 {
 	// TODO: Add your control notification handler code here
 	gnSystemStatus = 0;
+}
+
+
+void CMRRKinectDlg::OnBnClickedButtonSetmodel()
+{
+	// TODO: Add your control notification handler code here
+	if(m_pHandTracker!=NULL)
+		m_pHandTracker->setShouldInit(true);
 }

@@ -959,10 +959,10 @@ DWORD CDIBDC::DIBHeaderSize()
 	return dwHeaderSize;
 }
 
-BOOL CDIBDC::SaveImage(LPCTSTR lpszPathName)
+BOOL CDIBDC::SaveImage(const char* lpszPathName)
 {
 	CFile file;
-	if(!file.Open(lpszPathName, CFile::modeWrite | CFile::modeCreate))
+	if(!file.Open((CString)lpszPathName, CFile::modeWrite | CFile::modeCreate))
 		return FALSE;
 
 	SaveBitmap(&file);
@@ -972,10 +972,10 @@ BOOL CDIBDC::SaveImage(LPCTSTR lpszPathName)
 	return TRUE;
 }
 
-BOOL CDIBDC::OpenImage(LPCTSTR lpszPathName)
+BOOL CDIBDC::OpenImage(const char* lpszPathName)
 {
 	CFile file;
-	if(!file.Open(lpszPathName, CFile::modeRead))
+	if(!file.Open((CString)lpszPathName, CFile::modeRead))
 		return FALSE;
 
 	BOOL bRet = GetBitmap(&file);

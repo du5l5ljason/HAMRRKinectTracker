@@ -10,11 +10,11 @@
 #include "KinectSkeletonOpenNI.h"
 #include "HandTrack.h"
 #include "KinectCalibration.h"
-#include "HandTrackMarker.h"
+#include "HandTrackMeanShift.h"
 #include "Background.h"
 #include "ImageProc.h"
 //For test
-#include "MarkerModel.h"
+#include "ColorModel.h"
 
 enum POINTMODE{
 	_PM_SKEL,
@@ -42,14 +42,14 @@ private:
 	CSliderCtrl* m_slider6;
 	
 	KinectSkeletonOpenNI* m_pSkeleton;
-	HandTrackMarker* m_pHandTracker;
+	HandTrackMeanShift* m_pHandTracker;
 	Background* m_pBG;
 	KinectOpenNI kinect;
 	KinectCalibration* m_pCalib;
 	ImageProc* m_pImgProc;
 
 	//For test
-	MarkerModel* m_pModel;
+	ColorModel* m_pModel;
 	void InitImgWnd();
 	void InitKinect();
 
@@ -61,11 +61,11 @@ public:
 	CImgWnd* getFullWnd(){return m_wndFull;}
 	Background* getBG(){return m_pBG;};
 	KinectSkeletonOpenNI* getSkeleton(){return m_pSkeleton;}
-	HandTrackMarker* getHandTracker(){return m_pHandTracker;};
+	HandTrackMeanShift* getHandTracker(){return m_pHandTracker;};
 	KinectCalibration* getCalibration(){return m_pCalib;};
 	ImageProc* getImgProc(){return m_pImgProc;};
 	//For test
-	MarkerModel* getModel(){return m_pModel;};
+	ColorModel* getModel(){return m_pModel;};
 
 // Construction
 public:
@@ -106,4 +106,5 @@ public:
 	afx_msg void OnBnClickedButtonCalib();
 	afx_msg void OnBnClickedButtonTrack();
 	afx_msg void OnBnClickedButtonReset();
+	afx_msg void OnBnClickedButtonSetmodel();
 };

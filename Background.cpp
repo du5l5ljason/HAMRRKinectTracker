@@ -49,7 +49,7 @@ void Background::removeBG(BaseBuf* rgb, BaseBuf* depth, BaseBuf* rgbBG, BaseBuf*
 			if( //abs( *(pRgbSrc) - *(pRgbBG) ) < _RGB_THRESH &  
 				//abs( *(pRgbSrc+1) - *(pRgbBG+1) ) < _RGB_THRESH & 
 				//abs( *(pRgbSrc+2) - *(pRgbBG+2) ) < _RGB_THRESH &
-				abs( nDepth - nDepthBG ) > _DEP_THRESH )
+				abs( nDepth - nDepthBG ) > _DEP_THRESH || nDepthBG > 170) //170 is a parameter. when the hand is rested at the desk, the depth difference is so small that we can't remove the desk as background.
 
 			{
 				*(pDst) = 255;

@@ -20,6 +20,7 @@ void pushQueue(Queue* queue, int data)
 		queue->last = p;
 	}
 }
+
 int popQueue(Queue* queue)
 {
 	QNode* p = NULL;
@@ -44,7 +45,44 @@ int popQueue(Queue* queue)
 	return data;
 
 }
-void ImageProc::cvtRGB2GRAY(BaseBuf* rgb, BaseBuf* gray, Rect rect)
+
+void ImageProc::cvtRGB2GRAY(BaseBuf* rgb, BaseBuf* gray, int mode)
+{
+	if(rgb->height() != gray->height() || rgb->width() != gray->width())return;
+	if(rgb->widthBytes() != 3* gray->widthBytes() ) return;
+
+	BYTE* pSrc = NULL;
+	BYTE* pDst = NULL;
+	int nHeight, nWidth, nWidthBytes;
+	nHeight = rgb->height();
+	nWidth = rgb->width();
+	nWidthBytes = rgb->widthBytes();
+	int b, g, r;
+
+	for(int j=0;j<nHeight;j++)
+	{	
+		pSrc = rgb->getData() + j*nWidthBytes;
+		pDst = gray->getData() + j*nWidthBytes/3;
+		for(int i=0;i<nWidth;i++, pSrc+=3, pDst+=1)
+		{	
+			if(mode == BGR2GRAY)
+			{	
+				b = *(pSrc);
+				g = *(pSrc+1);
+				r = *(pSrc+2);
+			}
+			else if(mode == RGB2GRAY)
+			{
+				b = *(pSrc+2);
+				g = *(pSrc+1);
+				r = *(pSrc);
+			}
+			*(pDst) = (int)(0.6*g + 0.3*r + 0.1*b);
+		}
+	}
+}
+
+void ImageProc::cvtRGB2GRAY(BaseBuf* rgb, BaseBuf* gray, Rect rect, int mode)
 {
 	if(rgb->height() != gray->height() || rgb->width() != gray->width())return;
 	if(rgb->widthBytes() != 3* gray->widthBytes() ) return;
@@ -56,17 +94,76 @@ void ImageProc::cvtRGB2GRAY(BaseBuf* rgb, BaseBuf* gray, Rect rect)
 	nWidth = rect.width;
 	nWidthBytes = rgb->widthBytes();
 	nOffset = rect.y * nWidthBytes + rect.x*3;
+	int b, g, r;
 
 	for(int j=0;j<nHeight;j++)
 	{	
 		pSrc = rgb->getData() + nOffset + j*nWidthBytes;
 		pDst = gray->getData() + (nOffset + j*nWidthBytes)/3;
 		for(int i=0;i<nWidth;i++, pSrc+=3, pDst+=1)
-			*pDst = *(pSrc);	
+		{	
+			if(mode == BGR2GRAY)
+			{	
+				b = *(pSrc);
+				g = *(pSrc+1);
+				r = *(pSrc+2);
+			}
+			else if(mode == RGB2GRAY)
+			{
+				b = *(pSrc+2);
+				g = *(pSrc+1);
+				r = *(pSrc);
+			}
+			*(pDst) = (int)(0.6*g + 0.3*r + 0.1*b);
+		}
 	}
 	
 }
-void ImageProc::cvtRGB2HSV(BaseBuf* rgb, BaseBuf* hsv, Rect rect)
+
+void ImageProc::cvtRGB2HSV(BaseBuf* rgb, BaseBuf* hsv, int mode)
+{
+	if(hsv->height() != rgb->height() || hsv->width() != rgb->width())return;
+	if(hsv->widthBytes() != rgb->widthBytes() ) return;
+
+	int r, g, b;
+	float h, s, v;
+	BYTE* pSrc = NULL;
+	BYTE* pDst = NULL;
+	int nHeight, nWidth, nWidthBytes;
+	nHeight = rgb->height();
+	nWidth = rgb->width();
+	nWidthBytes = rgb->widthBytes();
+
+	for(int j=0;j<nHeight;j++)
+	{	
+		pSrc = rgb->getData() + j*nWidthBytes;
+		pDst = hsv->getData() + j*nWidthBytes;
+		for(int i=0;i<nWidth;i++, pSrc+=3, pDst+=3)
+		{
+			if(mode == BGR2HSV)
+			{	
+				b = *(pSrc);			//
+				g = *(pSrc+1);
+				r = *(pSrc+2);
+			}
+			else if(mode == RGB2HSV)
+			{
+				b = *(pSrc+2);			//
+				g = *(pSrc+1);
+				r = *(pSrc);
+			}		
+			rgb2hsv(b,g,r,v,s,h);
+
+			*(pDst) = v;
+			*(pDst+1) = s;
+			*(pDst+2) = h*(255.0f/360);
+
+		}
+		
+	}
+}
+
+void ImageProc::cvtRGB2HSV(BaseBuf* rgb, BaseBuf* hsv, Rect rect, int mode)
 {
 	if(hsv->height() != rgb->height() || hsv->width() != rgb->width())return;
 	if(hsv->widthBytes() != rgb->widthBytes() ) return;
@@ -87,10 +184,18 @@ void ImageProc::cvtRGB2HSV(BaseBuf* rgb, BaseBuf* hsv, Rect rect)
 		pDst = hsv->getData() + nOffset + j*nWidthBytes;
 		for(int i=0;i<nWidth;i++, pSrc+=3, pDst+=3)
 		{
-			b = *(pSrc);			//
-			g = *(pSrc+1);
-			r = *(pSrc+2);
-			
+			if(mode == BGR2HSV)
+			{	
+				b = *(pSrc);			//
+				g = *(pSrc+1);
+				r = *(pSrc+2);
+			}
+			else if(mode == RGB2HSV)
+			{
+				b = *(pSrc+2);			//
+				g = *(pSrc+1);
+				r = *(pSrc);
+			}		
 			rgb2hsv(b,g,r,v,s,h);
 
 			*(pDst) = v;
@@ -101,6 +206,7 @@ void ImageProc::cvtRGB2HSV(BaseBuf* rgb, BaseBuf* hsv, Rect rect)
 		
 	}
 }
+
 void ImageProc::rgb2hsv(int blue, int green, int red, float& val, float& sat, float& hue )
 {
 	float max, min, delta, temp;
@@ -140,6 +246,7 @@ void ImageProc::rgb2hsv(int blue, int green, int red, float& val, float& sat, fl
 		hue += 360;
 	return;
 }
+
 void ImageProc::getROI(BaseBuf* src, BaseBuf* dst, Rect rect)
 {
 	if(src->height() <rect.height ||src->width()<rect.width)return;
@@ -168,6 +275,7 @@ void ImageProc::getROI(BaseBuf* src, BaseBuf* dst, Rect rect)
 	}
 
 }
+
 void ImageProc::medianfilter(BaseBuf* src, Rect rect, int size)
 {
 	if(size%2==0)return;
@@ -218,6 +326,7 @@ void ImageProc::medianfilter(BaseBuf* src, Rect rect, int size)
 
 	delete[] filter;
 }
+
 int ImageProc::labelConnectedRegion(BaseBuf* bin, BaseBuf* labelbin, Rect rect)
 {
 	if((bin->width()!=labelbin->width())||(bin->height()!=labelbin->height()))
@@ -271,6 +380,7 @@ int ImageProc::labelConnectedRegion(BaseBuf* bin, BaseBuf* labelbin, Rect rect)
 	return labelIndex;
 	
 }
+
 void ImageProc::searchNeighbor(BaseBuf* bin, BaseBuf* labelbin, int labelIndex, int pixelIndex, Queue* queue )
 {
 	int searchIndex;

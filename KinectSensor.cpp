@@ -2,7 +2,7 @@
 #include "KinectSensor.h"
 
 //-------------------------------------------------------------------------
-const XnChar* SAMPLE_XML_PATH = "C:\\Program Files\\OpenNI\\Data\\SamplesConfig.xml";
+const XnChar* SAMPLE_XML_PATH = "E:\\Program Files\\OpenNI\\Data\\SamplesConfig.xml";
 
 void checkOpenNIError( XnStatus eResult, char* sStatus)
 {
@@ -37,7 +37,7 @@ void KinectOpenNI::open() {
 	//m_depthImg->copyBuffer((BYTE*)m_depthGen.GetDepthMap());
 }
 void KinectOpenNI::update(){
-	checkOpenNIError( m_Context.WaitAnyUpdateAll(), "Update DataStream" );
+	checkOpenNIError( m_Context.WaitAndUpdateAll(), "Update DataStream" );
 	m_rgbImg->copyBuffer((BYTE*)m_rgbGen.GetImageMap());
 	m_depthImg->copyBuffer((BYTE*)m_depthGen.GetDepthMap());
 }

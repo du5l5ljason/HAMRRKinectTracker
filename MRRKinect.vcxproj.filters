@@ -22,6 +22,7 @@
     <None Include="res\MRRKinect.ico">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="ClassDiagram1.cd" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="MRRKinect.h">
@@ -66,19 +67,22 @@
     <ClInclude Include="HandTrack.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="HandTrackMarker.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Background.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="ImageProc.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="MarkerModel.h">
+    <ClInclude Include="KinectCalibration.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="KinectCalibration.h">
+    <ClInclude Include="HandTrackMeanShift.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ColorModel.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Kernel.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -116,19 +120,22 @@
     <ClCompile Include="HandTrack.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="HandTrackMarker.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Background.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="ImageProc.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="MarkerModel.cpp">
+    <ClCompile Include="KinectCalibration.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="KinectCalibration.cpp">
+    <ClCompile Include="ColorModel.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Kernel.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="HandTrackMeanShift.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

@@ -87,7 +87,7 @@ void KinectCalibration::testCalib(BaseBuf* imgRGB, BaseBuf* imgDepth, DepthGener
 	findMarkers(imgTemp, pImgPtSet);
 
 	POINT3D pGlobalPt = cvtIPtoGP(pImgPtSet[0], pDepthGen);
-	cout << "The Point in Global Coord is:" << pGlobalPt.x << ", " << pGlobalPt.y << ", " << pGlobalPt.z << ", " << endl;
+	//cout << "The Point in Global Coord is:" << pGlobalPt.x << ", " << pGlobalPt.y << ", " << pGlobalPt.z << ", " << endl;
 	delete[] pImgPtSet;
 	cvReleaseImage(&imgTemp);
 }
@@ -112,7 +112,7 @@ POINT3D KinectCalibration::cvtIPtoCamP( const POINT3D pImgPt, DepthGenerator* pD
 
 	idx = pImgPt.y * nwidth + pImgPt.x;
 
-	pCamPt.x= ( pImgPt.x - _cx ) * pDepthMap[idx]/ _fx;
+	pCamPt.x = ( pImgPt.x - _cx ) * pDepthMap[idx]/ _fx;
 	pCamPt.y = ( pImgPt.y - _cy ) * pDepthMap[idx]/ _fy;
 	pCamPt.z = pDepthMap[idx];
 
@@ -273,21 +273,21 @@ void KinectCalibration::segbyColor( BaseBuf* imgSrc, BaseBuf* imgDst, int nColor
 	int va1,va2,va3;
 	if(nColor == 0)
 	{
-		//m_value1 = 192;
-		//m_value2 = 26;
-		//m_value3 = 174;
-		//m_rangeV1 = 33;
-		//m_rangeV2 = 81;
-		//m_rangeV3 = 92;
+//		m_value1 = 182;
+//		m_value2 = 26;
+//		m_value3 = 174;
+//		m_rangeV1 = 33;
+//		m_rangeV2 = 81;
+//		m_rangeV3 = 92;
 	}
 	if(nColor == 1)
 	{
-		//m_value1 = 186;
-		//m_value2 = 132;
-		//m_value3 = 22;
-		//m_rangeV1 = 40;
-		//m_rangeV2 = 40;
-		//m_rangeV3 = 100;
+		m_value1 = 186;
+		m_value2 = 132;
+		m_value3 = 22;
+		m_rangeV1 = 40;
+		m_rangeV2 = 40;
+		m_rangeV3 = 100;
 	}
 	for(int j=0;j<imgSrc->height();j++)
 	{	

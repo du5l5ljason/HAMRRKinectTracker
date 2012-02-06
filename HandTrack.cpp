@@ -2,22 +2,22 @@
 #include "HandTrack.h"
 #include <iostream>
 
-void HandTrack::track(BaseBuf* rgbImg, BaseBuf* depthImg, BaseBuf* rgbBG, BaseBuf* depthBG, int cx, int cy, int width, int height, bool IsRright)
+void HandTrack::track(BaseBuf* rgbImg, BaseBuf* depthImg, BaseBuf* rgbBG, BaseBuf* depthBG, int cx, int cy, int width, int height )
 {	
 	Rect ROI;
 	//check if the skeleton information is available
 	// 
-	//if(m_rightHand.x >0 && m_rightHand.y > 0 && abs(m_rightHand.x-cx)>40 && abs(m_rightHand.y-cy)>40)
+	//if(m_pHandPos.x >0 && m_pHandPos.y > 0 && abs(m_pHandPos.x-cx)>40 && abs(m_pHandPos.y-cy)>40)
 	//{
-	//	cx = m_rightHand.x;
-	//	cy = m_rightHand.y;
+	//	cx = m_pHandPos.x;
+	//	cy = m_pHandPos.y;
 	//}
 	//1. Set Scan Window
 	setScanWindow(cx, cy, width, height, ROI);	
 	//2. Set/Remove Background
 	m_pBG->removeBG(rgbImg, depthImg, rgbBG, depthBG, m_img, ROI);
 	//3. Hand region segmentation and locate the hand position
-	relocateHandPos(m_img, NULL, ROI);		//pass the new located rect value to ROI
+	updateHandPos(m_img, NULL, ROI);		//pass the new located rect value to ROI
 	//4. Update Window
 	updateWindow(ROI);
 }
@@ -59,15 +59,15 @@ void HandTrack::setScanWindow(int x, int y, int width, int height, Rect &rect)
 
 void HandTrack::updateWindow(Rect rect)
 {
-	m_rightHand.x = rect.x+rect.width/2;
-	m_rightHand.y = rect.y+rect.height/2;
+	m_pHandPos.x = rect.x+rect.width/2;
+	m_pHandPos.y = rect.y+rect.height/2;
 	int nXRes = m_img->width();
 	int nYRes = m_img->height();
 	m_rectWidth = rect.width;
 	m_rectHeight = rect.height;
 
-	if((m_rightHand.x+m_rectWidth/2)>nXRes)
-		m_rectWidth = 2*(nXRes - m_rightHand.x);
-	if((m_rightHand.y+m_rectHeight/2)>nYRes)
-		m_rectHeight = 2*(nYRes - m_rightHand.y);
+	if((m_pHandPos.x+m_rectWidth/2)>nXRes)
+		m_rectWidth = 2*(nXRes - m_pHandPos.x);
+	if((m_pHandPos.y+m_rectHeight/2)>nYRes)
+		m_rectHeight = 2*(nYRes - m_pHandPos.y);
 }

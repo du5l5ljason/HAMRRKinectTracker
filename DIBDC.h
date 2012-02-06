@@ -134,9 +134,9 @@ public:
 	//CDIBDC <--> file//
 	//用于DIBDC和文件交换数据. 
 	//Open image from indicated file.
-	BOOL OpenImage(LPCTSTR lpszPathName);
+	BOOL OpenImage(const char* lpszPathName);
 	//Save image from indicated file.
-	BOOL SaveImage(LPCTSTR lpszPathName);
+	BOOL SaveImage(const char* lpszPathName);
 
 	//Set cryptic version of the image file.
 	//Save Bitmap to a file

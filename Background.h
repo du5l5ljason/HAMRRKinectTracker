@@ -1,9 +1,14 @@
 #pragma once
 #include "Buffer.h"
-#include "StructDefine.h"
+#include "UserTypes.h"
 #include "ImageProc.h"
-#define _RGB_THRESH 40
-#define _DEP_THRESH 10
+#include <cv.h>
+#include <highgui.h>
+#include <XnCppWrapper.h>
+#include "UserConfigs.h"
+
+
+using namespace xn;
 
 class Background
 {
@@ -12,7 +17,8 @@ private:
 	BaseBuf* m_imgDepthBG;
 	ImageProc m_pImgProc;
 	bool m_bIsBG;
-	
+
+	unsigned int m_nDepthThresh;
 public:
 	BaseBuf* getRgbBG() const{ return m_imgRgbBG;};
 	BaseBuf* getDepthBG() const{ return m_imgDepthBG;};
@@ -23,17 +29,27 @@ public:
 		m_imgDepthBG->copyBuffer(buf->getData());
 	}
 	bool isBG(){return m_bIsBG; }
+	
+	unsigned int getDepthThresh(){return m_nDepthThresh;};
+	void setDepthThresh(unsigned int n){m_nDepthThresh = n;};
 	void init(BaseBuf*, BaseBuf*);
-	void removeBG(BaseBuf*, BaseBuf*, BaseBuf*, BaseBuf*,  BaseBuf*, Rect);
-
+	void removeBG(BaseBuf*, BaseBuf*, BaseBuf*, BaseBuf*,  BaseBuf*, Rect, float);
+	void removeBG( BaseBuf*, BaseBuf*, BaseBuf*, Rect, float  ); 
 public:
-	Background(void):m_imgRgbBG(NULL), m_imgDepthBG(NULL),m_bIsBG(false){};
-	Background(int w, int h):m_bIsBG(false){
+	Background(void):m_imgRgbBG(NULL), m_imgDepthBG(NULL),m_bIsBG(false){
+
+	};
+	Background(int w, int h):m_bIsBG(false),m_nDepthThresh(0){
 		m_imgRgbBG = new Buffer24(w, h, w*3);
 		m_imgDepthBG = new Buffer16(w, h, w*2);
 	}
 	~Background(void){
-		delete m_imgRgbBG,m_imgDepthBG;
+		delete m_imgRgbBG;
+		delete m_imgDepthBG;
+
 	}
+
+private:
+	bool loadBGfromFile(const char*, const char*);
 };
 

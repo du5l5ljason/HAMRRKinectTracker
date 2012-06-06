@@ -1,9 +1,14 @@
 #include "StdAfx.h"
 #include "KinectCalibration.h"
 #include <math.h>
+#include <stdio.h>
 #include <iostream>
+#include <string>
 
 using namespace std;
+int gnCounter = 0;  // count the number of frames to be saved.
+double tempRot[3][3] = {0};
+double tempTran[3][1] = {0};
 KinectCalibration::KinectCalibration(void)
 {
 	for(int i=0;i<3;i++)
@@ -12,8 +17,14 @@ KinectCalibration::KinectCalibration(void)
 	for(int i=0;i<3;i++)
 		for(int j=0;j<1;j++)
 			m_matRot[i][j] = 0;
+	for( int i=0; i<3; ++i)
+	{
+		m_pGP[i].x = 0;
+		m_pGP[i].y = 0;
+		m_pGP[i].z = 0;
+	}
 	m_pImgProc = new ImageProc;
-
+	m_isSaving = false;
 	m_nCalibStage = 0;		//calculating
 }
 
@@ -23,20 +34,16 @@ KinectCalibration::~KinectCalibration(void)
 }
 
 //Interface
-void KinectCalibration::Calibrate(BaseBuf* imgRGB, BaseBuf* imgDepth, DepthGenerator* pDepthGen)
+void KinectCalibration::startCalib(BaseBuf* imgRGB, BaseBuf* imgDepth, DepthGenerator* pDepthGen)
 {
-	//status -- _CALC, _TEST
-	switch(m_nCalibStage)
-	{
-		case 0: calcCalib(imgRGB, imgDepth, pDepthGen);break;
-		case 1: testCalib(imgRGB, imgDepth, pDepthGen);break;
+	const char* fileName = _CALIB_FILE_PATH"calibrationData.txt";
+	if(loadCalibrationDatafromFile(fileName)){
+		cout << "Already have calibration data, load data from file\n" << endl;
+		return;
 	}
-}
-
-void KinectCalibration::calcCalib(BaseBuf* imgRGB, BaseBuf* imgDepth, DepthGenerator* pDepthGen)
-{
+	
 	//segmentation
-	segbyColor(imgRGB, imgRGB, 0);
+	segbyColor(imgRGB, imgRGB);
 
 	IplImage* imgTemp = cvCreateImage(cvSize(imgRGB->width(), imgRGB->height()),8,1);
 	BYTE* pTemp = NULL;
@@ -63,13 +70,49 @@ void KinectCalibration::calcCalib(BaseBuf* imgRGB, BaseBuf* imgDepth, DepthGener
 
 	computeRot();
 	computeTran();
+	if(isSaving())
+	{
+		if(gnCounter<=_NFRAMES)
+		{
+			for(int i = 0; i<3; ++i)
+			{
+				for(int j = 0; j<3; ++j)
+				{
+					tempRot[i][j] += m_matRot[i][j];
+				}
+			}
+			for(int i =0; i<3 ; ++i )
+				tempTran[i][1] += m_matTran[i][1];
+			gnCounter++;
+			return;
+		}
+		//set rotation and translation according to the mean value
+		for(int i = 0; i<3; ++i)
+		{
+				for(int j = 0; j<3; ++j)
+				{
+					m_matRot[i][j] = tempRot[i][j]/100.0f;
+				}
+		}
+		for(int i =0; i<3 ; ++i )
+			m_matTran[i][1] = tempTran[i][1]/100.0f;
+
+		saveCalibrationDatatoFile();
+		gnCounter = 0;
+		m_isSaving = false;
+	}
 	delete[] pImgPtSet;
 	cvReleaseImage(&imgTemp);
 }
 
+void KinectCalibration::startCalib(POINT3D* pImgPtSet, DepthGenerator* pDepthGen)
+{
+	computeRot();
+	computeTran();
+}
 void KinectCalibration::testCalib(BaseBuf* imgRGB, BaseBuf* imgDepth, DepthGenerator* pDepthGen)
 {
-	segbyColor(imgRGB, imgRGB, 1);
+	segbyColor(imgRGB, imgRGB);
 	IplImage* imgTemp = cvCreateImage(cvSize(imgRGB->width(), imgRGB->height()),8,1);
 	BYTE* pTemp = NULL;
 	BYTE* pSrc = NULL;
@@ -87,7 +130,7 @@ void KinectCalibration::testCalib(BaseBuf* imgRGB, BaseBuf* imgDepth, DepthGener
 	findMarkers(imgTemp, pImgPtSet);
 
 	POINT3D pGlobalPt = cvtIPtoGP(pImgPtSet[0], pDepthGen);
-	//cout << "The Point in Global Coord is:" << pGlobalPt.x << ", " << pGlobalPt.y << ", " << pGlobalPt.z << ", " << endl;
+	cout << "The Point in Global Coord is:" << pGlobalPt.x << ", " << pGlobalPt.y << ", " << pGlobalPt.z << ", " << endl;
 	delete[] pImgPtSet;
 	cvReleaseImage(&imgTemp);
 }
@@ -104,16 +147,27 @@ POINT3D KinectCalibration::cvtIPtoGP(POINT3D pImgPt, DepthGenerator* pDepthGen)
 POINT3D KinectCalibration::cvtIPtoCamP( const POINT3D pImgPt, DepthGenerator* pDepthGen )
 {
 	int idx;
-	POINT3D pCamPt;
+	POINT3D pTempPt, pCamPt;
 	const XnDepthPixel* pDepthMap = pDepthGen->GetDepthMap() ;	//What is the problem of this sentence
 	int nheight = 480;
 	int nwidth = 640;
+	int nBound = 10;
+	pTempPt.x = pImgPt.x; 
+	pTempPt.y = pImgPt.y;
 
+	if(pTempPt.x < nBound)
+		pTempPt.x = nBound;
+	if(pTempPt.x > 640 - nBound)
+		pTempPt.x = 640 - nBound;
+	if(pTempPt.y < nBound )
+		pTempPt.y = nBound;
+	if(pTempPt.y > (480 - nBound))
+		pTempPt.y = 480 - nBound;
 
-	idx = pImgPt.y * nwidth + pImgPt.x;
+	idx = pTempPt.y * nwidth + pTempPt.x;
 
-	pCamPt.x = ( pImgPt.x - _cx ) * pDepthMap[idx]/ _fx;
-	pCamPt.y = ( pImgPt.y - _cy ) * pDepthMap[idx]/ _fy;
+	pCamPt.x = ( pTempPt.x - _cx ) * pDepthMap[idx]/ _fx;
+	pCamPt.y = ( pTempPt.y - _cy ) * pDepthMap[idx]/ _fy;
 	pCamPt.z = pDepthMap[idx];
 
 	//print
@@ -134,7 +188,7 @@ POINT3D KinectCalibration::cvtCamPtoGP( POINT3D pCamPt )
 	//Do matrix multification
 	pGlobalPt.x = m_matRot[0][0]*ptTemp.x + m_matRot[0][1]*ptTemp.y + m_matRot[0][2]*ptTemp.z;
 	pGlobalPt.y = m_matRot[1][0]*ptTemp.x + m_matRot[1][1]*ptTemp.y + m_matRot[1][2]*ptTemp.z;
-	pGlobalPt.z = m_matRot[2][0]*ptTemp.x + m_matRot[2][1]*ptTemp.y + m_matRot[2][2]*ptTemp.z;
+	pGlobalPt.z = -(m_matRot[2][0]*ptTemp.x + m_matRot[2][1]*ptTemp.y + m_matRot[2][2]*ptTemp.z);		//z prime should be set reverse due to our need.
 	
 	return pGlobalPt;
 }
@@ -143,9 +197,9 @@ void KinectCalibration::computeRot()
 {
 	POINT3D ptA, ptB, ptC;
 	
-	ptA.x = m_pGP[0].x-m_pGP[2].x;
-	ptA.y = m_pGP[0].y-m_pGP[2].y;
-	ptA.z = m_pGP[0].z-m_pGP[2].z;
+	ptA.x = m_pGP[1].x-m_pGP[2].x;
+	ptA.y = m_pGP[1].y-m_pGP[2].y;
+	ptA.z = m_pGP[1].z-m_pGP[2].z;
 	double norm = sqrt(ptA.x*ptA.x+ptA.y*ptA.y+ptA.z*ptA.z);
 	if(norm != 0)
 	{
@@ -154,9 +208,9 @@ void KinectCalibration::computeRot()
 		ptA.z = ptA.z/norm;
 	}
 
-	ptB.x = m_pGP[1].x-m_pGP[2].x;
-	ptB.y = m_pGP[1].y-m_pGP[2].y;
-	ptB.z = m_pGP[1].z-m_pGP[2].z;
+	ptB.x = m_pGP[0].x-m_pGP[2].x;
+	ptB.y = m_pGP[0].y-m_pGP[2].y;
+	ptB.z = m_pGP[0].z-m_pGP[2].z;
 	norm = sqrt(ptB.x*ptB.x+ptB.y*ptB.y+ptB.z*ptB.z);
 	
 	if(norm != 0)
@@ -187,9 +241,9 @@ void KinectCalibration::computeRot()
 	m_matRot[2][2] = ptC.z;
 
 	//print
-	cout << "Rotation Matrix is : " << m_matRot[0][0] << ", " << m_matRot[0][1] << ", " << m_matRot[0][2] << endl;
-	cout << m_matRot[1][0] << ", " << m_matRot[1][1] << ", " << m_matRot[1][2] << endl;
-	cout << m_matRot[2][0] << ", " << m_matRot[2][1] << ", " << m_matRot[2][2] << endl;
+	//cout << "Rotation Matrix is : " << m_matRot[0][0] << ", " << m_matRot[0][1] << ", " << m_matRot[0][2] << endl;
+	//cout << m_matRot[1][0] << ", " << m_matRot[1][1] << ", " << m_matRot[1][2] << endl;
+	//cout << m_matRot[2][0] << ", " << m_matRot[2][1] << ", " << m_matRot[2][2] << endl;
 
 }
 
@@ -199,7 +253,47 @@ void KinectCalibration::computeTran()
 	m_matTran[1][0] = m_pGP[2].y;
 	m_matTran[2][0] = m_pGP[2].z;
 	//print
-	cout << "Translation Vector is : " << m_matTran[0][0] << ", " << m_matTran[1][0] << ", " << m_matTran[2][0] << endl;  
+	/*cout << "Translation Vector is : " << m_matTran[0][0] << ", " << m_matTran[1][0] << ", " << m_matTran[2][0] << endl;  */
+}
+
+void KinectCalibration::saveCalibration()
+{
+	m_isSaving = true;
+}
+
+void KinectCalibration::saveCalibrationDatatoFile()
+{
+	FILE* fp;
+	const char* fileName = _CALIB_FILE_PATH"calibrationData.txt";
+	if((fp = fopen(fileName, "w+"))==NULL)
+		return;
+
+	for( int i = 0 ; i< 3; ++i)
+	{
+		fprintf( fp, "%lf, %lf, %lf\n", m_matRot[i][0], m_matRot[i][1], m_matRot[i][2] );
+	}
+
+	fprintf( fp, "%lf, %lf, %lf\n", m_matTran[0][0], m_matTran[1][0], m_matTran[2][0] );
+	fclose( fp );
+}
+
+bool KinectCalibration::loadCalibrationDatafromFile(const char* fileName)
+{
+	FILE* fp;
+	if((fp = fopen(fileName, "r")) == NULL)
+		return false;
+	else
+	{
+		for( int i = 0 ; i< 3; ++i)
+		{
+			fscanf_s( fp, "%lf, %lf, %lf", &m_matRot[i][0], &m_matRot[i][1], &m_matRot[i][2] );
+		}
+		fscanf_s( fp, "%lf, %lf, %lf", &m_matTran[0][0], &m_matTran[1][0], &m_matTran[2][0] );
+		
+		fclose( fp );
+		return true;
+	}
+
 }
 //
 void KinectCalibration::identifyIP( POINT3D* pImgPtSet )
@@ -250,6 +344,10 @@ void KinectCalibration::identifyIP( POINT3D* pImgPtSet )
 
 double KinectCalibration::calcDist( POINT3D point1, POINT3D point2 )	
 {
+	if(abs(point1.z)<0.1)
+		point1.z = 0;
+	if(abs(point2.z)<0.1)
+		point2.z = 0;
 	return (sqrt((point1.x-point2.x)*(point1.x-point2.x)+ 
 	(point1.y-point2.y)*(point1.y-point2.y)+ 
 	(point1.z-point2.z)*(point1.z-point2.z)));
@@ -262,7 +360,7 @@ void KinectCalibration::swapID( POINT3D *point1, POINT3D *point2 )
 	*point2 = temp;
 }
 
-void KinectCalibration::segbyColor( BaseBuf* imgSrc, BaseBuf* imgDst, int nColor )
+void KinectCalibration::segbyColor( BaseBuf* imgSrc, BaseBuf* imgDst )
 {
 	if(imgDst->height() != imgSrc->height() || imgDst->width() != imgSrc->width())return;
 	if(imgDst->widthBytes() != imgSrc->widthBytes() ) return;
@@ -271,24 +369,14 @@ void KinectCalibration::segbyColor( BaseBuf* imgSrc, BaseBuf* imgDst, int nColor
 	BYTE* pDst = NULL;
 
 	int va1,va2,va3;
-	if(nColor == 0)
-	{
-//		m_value1 = 182;
-//		m_value2 = 26;
-//		m_value3 = 174;
-//		m_rangeV1 = 33;
-//		m_rangeV2 = 81;
-//		m_rangeV3 = 92;
-	}
-	if(nColor == 1)
-	{
-		m_value1 = 186;
-		m_value2 = 132;
-		m_value3 = 22;
-		m_rangeV1 = 40;
-		m_rangeV2 = 40;
-		m_rangeV3 = 100;
-	}
+
+	//m_value1 = 186;
+	//m_value2 = 132;
+	//m_value3 = 22;
+	m_rangeV1 = 40;
+	m_rangeV2 = 40;
+	m_rangeV3 = 100;
+
 	for(int j=0;j<imgSrc->height();j++)
 	{	
 		pSrc = imgSrc->getData() + j*imgSrc->widthBytes();
@@ -352,15 +440,18 @@ void KinectCalibration::findMarkers( IplImage* imgBin, POINT3D* pImgPtSet )
 		area = CirBoundingBox.width * CirBoundingBox.height;
 
 		//2.Filter the noise contour
-		if( area>100 && area<5000 && idx<3 )			//Problem: why it can't be replaced as m_nMarkerNum
+		if( CirBoundingBox.x >100 && CirBoundingBox.x < 500)
 		{
-			//3.Draw the contours, Boundingboxes, and centers
-			//DrawMarkerRegions(CirBoundingBox, BoundingCtr, IplRawImage);
-			pImgPtSet[idx].x = BoundingCtr.x;
-			pImgPtSet[idx].y = BoundingCtr.y;
-			pImgPtSet[idx].z = 0;
-			idx++;
+			if( area>30 && area<5000 && idx<3 )			//Problem: why it can't be replaced as m_nMarkerNum
+			{
+				//3.Draw the contours, Boundingboxes, and centers
+				//DrawMarkerRegions(CirBoundingBox, BoundingCtr, IplRawImage);
+				pImgPtSet[idx].x = BoundingCtr.x;
+				pImgPtSet[idx].y = BoundingCtr.y;
+				pImgPtSet[idx].z = 0;
+				idx++;
 			
+			}
 		}
 	}
 	//cout << "The point position is " << m_pMarkerPos[0].x << " " << m_pMarkerPos[0].y << " " << m_pMarkerPos[0].z  <<endl;

@@ -13,6 +13,36 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Header Files\Utils">
+      <UniqueIdentifier>{f97485e5-0504-4c9b-80b0-097fcd662fc8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Uitls">
+      <UniqueIdentifier>{f022e2d0-4b9b-4b39-8cc7-d4d1637a866d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Data">
+      <UniqueIdentifier>{8dc82340-0057-4a78-a3e7-a6ccd36232ec}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\View">
+      <UniqueIdentifier>{dd891746-f3cc-4584-b042-d725759eca00}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Structure">
+      <UniqueIdentifier>{20e83729-cb5f-4b38-8d03-a75faf3ae90a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Device">
+      <UniqueIdentifier>{9f8bdddf-f6f4-4f4d-ab57-c41fe26739fa}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Data">
+      <UniqueIdentifier>{430cd24f-0ed7-4acd-a490-bccdbcbb3825}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Device">
+      <UniqueIdentifier>{6cbbb51a-f08d-460c-bf99-516755148786}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Structure">
+      <UniqueIdentifier>{3feabccf-71fa-491c-a02a-9a5cfa9dd48f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\View">
+      <UniqueIdentifier>{52ef6710-a6ce-402c-8228-c5dc666cf94d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="ReadMe.txt" />
@@ -40,50 +70,92 @@
     <ClInclude Include="Resource.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="DIBDC.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ImgWnd.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Buffer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="KinectSensor.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="KinectSkeleton.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="KinectSkeletonOpenNI.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="DrawWnd.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="StructDefine.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="HandTrack.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Background.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="DIBDC.h">
+      <Filter>Header Files\Utils</Filter>
     </ClInclude>
     <ClInclude Include="ImageProc.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\Utils</Filter>
     </ClInclude>
-    <ClInclude Include="KinectCalibration.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="KalmanFilter.h">
+      <Filter>Header Files\Utils</Filter>
     </ClInclude>
-    <ClInclude Include="HandTrackMeanShift.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="KSArchivingData.h">
+      <Filter>Header Files\Data</Filter>
+    </ClInclude>
+    <ClInclude Include="KSFrameData.h">
+      <Filter>Header Files\Data</Filter>
+    </ClInclude>
+    <ClInclude Include="KSElbowData.h">
+      <Filter>Header Files\Data</Filter>
+    </ClInclude>
+    <ClInclude Include="KSHandTrackData.h">
+      <Filter>Header Files\Data</Filter>
+    </ClInclude>
+    <ClInclude Include="KSHandTrackDataUsingMeanShift.h">
+      <Filter>Header Files\Data</Filter>
+    </ClInclude>
+    <ClInclude Include="KSTorsoData.h">
+      <Filter>Header Files\Data</Filter>
+    </ClInclude>
+    <ClInclude Include="DrawWnd.h">
+      <Filter>Header Files\View</Filter>
+    </ClInclude>
+    <ClInclude Include="ImgWnd.h">
+      <Filter>Header Files\View</Filter>
+    </ClInclude>
+    <ClInclude Include="Buffer.h">
+      <Filter>Header Files\Structure</Filter>
     </ClInclude>
     <ClInclude Include="ColorModel.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\Structure</Filter>
     </ClInclude>
     <ClInclude Include="Kernel.h">
+      <Filter>Header Files\Structure</Filter>
+    </ClInclude>
+    <ClInclude Include="KinectCalibration.h">
+      <Filter>Header Files\Device</Filter>
+    </ClInclude>
+    <ClInclude Include="KinectSkeletonOpenNI.h">
+      <Filter>Header Files\Device</Filter>
+    </ClInclude>
+    <ClInclude Include="KinectSensor.h">
+      <Filter>Header Files\Device</Filter>
+    </ClInclude>
+    <ClInclude Include="KinectSensorOpenNI.h">
+      <Filter>Header Files\Device</Filter>
+    </ClInclude>
+    <ClInclude Include="KinectSkeleton.h">
+      <Filter>Header Files\Device</Filter>
+    </ClInclude>
+    <ClInclude Include="ksUtilsFilter.h">
+      <Filter>Header Files\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="KSUtilsMAFilter.h">
+      <Filter>Header Files\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="UserTypes.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="UserConfigs.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="KinectSkeletonNUI.h">
+      <Filter>Header Files\Device</Filter>
+    </ClInclude>
+    <ClInclude Include="MulticastClient.h">
+      <Filter>Header Files\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="MulticastCommon.h">
+      <Filter>Header Files\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="MulticastServer.h">
+      <Filter>Header Files\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="KSFrameDataSender.h">
+      <Filter>Header Files\Data</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -96,47 +168,83 @@
     <ClCompile Include="stdafx.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="DIBDC.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="ImgWnd.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Buffer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="KinectSensor.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="KinectSkeleton.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="KinectSkeletonOpenNI.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="DrawWnd.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="HandTrack.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Background.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Uitls</Filter>
+    </ClCompile>
+    <ClCompile Include="DIBDC.cpp">
+      <Filter>Source Files\Uitls</Filter>
     </ClCompile>
     <ClCompile Include="ImageProc.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Uitls</Filter>
     </ClCompile>
-    <ClCompile Include="KinectCalibration.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="KalmanFilter.cpp">
+      <Filter>Source Files\Uitls</Filter>
+    </ClCompile>
+    <ClCompile Include="Buffer.cpp">
+      <Filter>Source Files\Structure</Filter>
     </ClCompile>
     <ClCompile Include="ColorModel.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Structure</Filter>
     </ClCompile>
     <ClCompile Include="Kernel.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Structure</Filter>
     </ClCompile>
-    <ClCompile Include="HandTrackMeanShift.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="DrawWnd.cpp">
+      <Filter>Source Files\View</Filter>
+    </ClCompile>
+    <ClCompile Include="ImgWnd.cpp">
+      <Filter>Source Files\View</Filter>
+    </ClCompile>
+    <ClCompile Include="KinectCalibration.cpp">
+      <Filter>Source Files\Device</Filter>
+    </ClCompile>
+    <ClCompile Include="KinectSkeletonOpenNI.cpp">
+      <Filter>Source Files\Device</Filter>
+    </ClCompile>
+    <ClCompile Include="KinectSensor.cpp">
+      <Filter>Source Files\Device</Filter>
+    </ClCompile>
+    <ClCompile Include="KinectSensorOpenNI.cpp">
+      <Filter>Source Files\Device</Filter>
+    </ClCompile>
+    <ClCompile Include="KinectSkeleton.cpp">
+      <Filter>Source Files\Device</Filter>
+    </ClCompile>
+    <ClCompile Include="KSArchivingData.cpp">
+      <Filter>Source Files\Data</Filter>
+    </ClCompile>
+    <ClCompile Include="KSHandTrackDataUsingMeanShift.cpp">
+      <Filter>Source Files\Data</Filter>
+    </ClCompile>
+    <ClCompile Include="KSElbowData.cpp">
+      <Filter>Source Files\Data</Filter>
+    </ClCompile>
+    <ClCompile Include="KSFrameData.cpp">
+      <Filter>Source Files\Data</Filter>
+    </ClCompile>
+    <ClCompile Include="KSHandTrackData.cpp">
+      <Filter>Source Files\Data</Filter>
+    </ClCompile>
+    <ClCompile Include="KSTorsoData.cpp">
+      <Filter>Source Files\Data</Filter>
+    </ClCompile>
+    <ClCompile Include="KSUtilsFilter.cpp">
+      <Filter>Source Files\Uitls</Filter>
+    </ClCompile>
+    <ClCompile Include="KSUtilsMAFilter.cpp">
+      <Filter>Source Files\Uitls</Filter>
+    </ClCompile>
+    <ClCompile Include="KinectSkeletonNUI.cpp">
+      <Filter>Source Files\Device</Filter>
+    </ClCompile>
+    <ClCompile Include="MulticastClient.cpp">
+      <Filter>Source Files\Uitls</Filter>
+    </ClCompile>
+    <ClCompile Include="MulticastServer.cpp">
+      <Filter>Source Files\Uitls</Filter>
+    </ClCompile>
+    <ClCompile Include="KSFrameDataSender.cpp">
+      <Filter>Source Files\Data</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

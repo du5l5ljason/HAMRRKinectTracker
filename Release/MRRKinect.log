@@ -1,0 +1,72 @@
+﻿Build started 5/28/2012 11:07:26 AM.
+     1>Project "D:\My Documents\Visual Studio 2010\Projects\(20111028)MRRKinect(Orignal)\MRRKinect(Orignal)\MRRKinect\MRRKinect.vcxproj" on node 2 (build target(s)).
+     1>InitializeBuildStatus:
+         Creating "Release\MRRKinect.unsuccessfulbuild" because "AlwaysCreate" was specified.
+       ClCompile:
+         All outputs are up-to-date.
+         e:\Common Softwares\Microsoft Visual Studio 10.0\VC\bin\CL.exe /c /Zi /nologo /W3 /WX- /O2 /Oi /Oy- /GL /D WIN32 /D _WINDOWS /D NDEBUG /D _UNICODE /D UNICODE /Gm- /EHsc /MT /GS /Gy /fp:precise /Zc:wchar_t /Zc:forScope /Yu"StdAfx.h" /Fp"Release\MRRKinect.pch" /Fo"Release\\" /Fd"Release\vc100.pdb" /Gd /TP /analyze- /errorReport:prompt KSFrameDataSender.cpp MRRKinect.cpp MRRKinectDlg.cpp
+         KSFrameDataSender.cpp
+         MRRKinect.cpp
+     1>e:\common softwares\opencv-2.3.1\opencv\build\include\opencv\opencv2\flann\logger.h(66): warning C4996: 'fopen': This function or variable may be unsafe. Consider using fopen_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+                 e:\Common Softwares\Microsoft Visual Studio 10.0\VC\include\stdio.h(234) : see declaration of 'fopen'
+     1>e:\common softwares\opencv-2.3.1\opencv\build\include\opencv\opencv2/flann/flann.hpp(233): warning C4996: 'cv::flann::Index_<T>': was declared deprecated
+                 e:\common softwares\opencv-2.3.1\opencv\build\include\opencv\opencv2/flann/flann.hpp(278) : see reference to class template instantiation 'cv::flann::Index_<T>' being compiled
+         MRRKinectDlg.cpp
+     1>e:\common softwares\opencv-2.3.1\opencv\build\include\opencv\opencv2\flann\logger.h(66): warning C4996: 'fopen': This function or variable may be unsafe. Consider using fopen_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+                 e:\Common Softwares\Microsoft Visual Studio 10.0\VC\include\stdio.h(234) : see declaration of 'fopen'
+     1>e:\common softwares\opencv-2.3.1\opencv\build\include\opencv\opencv2/flann/flann.hpp(233): warning C4996: 'cv::flann::Index_<T>': was declared deprecated
+                 e:\common softwares\opencv-2.3.1\opencv\build\include\opencv\opencv2/flann/flann.hpp(278) : see reference to class template instantiation 'cv::flann::Index_<T>' being compiled
+     1>MRRKinectDlg.cpp(86): warning C4996: '__timezone': This function or variable may be unsafe. Consider using _get_timezone instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+                 e:\Common Softwares\Microsoft Visual Studio 10.0\VC\include\time.h(139) : see declaration of '__timezone'
+     1>MRRKinectDlg.cpp(87): warning C4996: '__daylight': This function or variable may be unsafe. Consider using _get_daylight instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+                 e:\Common Softwares\Microsoft Visual Studio 10.0\VC\include\time.h(131) : see declaration of '__daylight'
+     1>MRRKinectDlg.cpp(392): warning C4244: '=' : conversion from 'float' to 'int', possible loss of data
+     1>MRRKinectDlg.cpp(393): warning C4244: '=' : conversion from 'float' to 'int', possible loss of data
+       ResourceCompile:
+         All outputs are up-to-date.
+       Link:
+         e:\Common Softwares\Microsoft Visual Studio 10.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"D:\My Documents\Visual Studio 2010\Projects\(20111028)MRRKinect(Orignal)\MRRKinect(Orignal)\Release\MRRKinect.exe" /INCREMENTAL:NO /NOLOGO OpenNI.lib opencv_core231.lib opencv_highgui231.lib opencv_imgproc231.lib ws2_32.lib /MANIFEST /ManifestFile:"Release\MRRKinect.exe.intermediate.manifest" /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /DEBUG /PDB:"D:\My Documents\Visual Studio 2010\Projects\(20111028)MRRKinect(Orignal)\MRRKinect(Orignal)\Release\MRRKinect.pdb" /SUBSYSTEM:WINDOWS /OPT:REF /OPT:ICF /LTCG /TLBID:1 /ENTRY:"wWinMainCRTStartup" /DYNAMICBASE /NXCOMPAT /IMPLIB:"D:\My Documents\Visual Studio 2010\Projects\(20111028)MRRKinect(Orignal)\MRRKinect(Orignal)\Release\MRRKinect.lib" /MACHINE:X86 Release\MRRKinect.res
+         Release\Background.obj
+         Release\Buffer.obj
+         Release\KinectSensorOpenNI.obj
+         Release\KinectSkeletonNUI.obj
+         Release\KSFrameDataSender.obj
+         Release\KSUtilsFilter.obj
+         Release\KalmanFilter.obj
+         Release\ImageProc.obj
+         Release\DIBDC.obj
+         Release\DrawWnd.obj
+         Release\KSElbowData.obj
+         Release\KSHandTrackData.obj
+         Release\KSHandTrackDataUsingMeanShift.obj
+         Release\ImgWnd.obj
+         Release\Kernel.obj
+         Release\KinectCalibration.obj
+         Release\KinectSensor.obj
+         Release\KinectSkeleton.obj
+         Release\KinectSkeletonOpenNI.obj
+         Release\ColorModel.obj
+         Release\KSArchivingData.obj
+         Release\KSFrameData.obj
+         Release\KSTorsoData.obj
+         Release\KSUtilsMAFilter.obj
+         Release\MRRKinect.obj
+         Release\MRRKinectDlg.obj
+         Release\MulticastClient.obj
+         Release\MulticastServer.obj
+         Release\stdafx.obj
+         Generating code
+     1>d:\my documents\visual studio 2010\projects\(20111028)mrrkinect(orignal)\mrrkinect(orignal)\mrrkinect\kinectcalibration.h(64): warning C4715: 'KinectCalibration::getGPAt' : not all control paths return a value
+     1>d:\my documents\visual studio 2010\projects\(20111028)mrrkinect(orignal)\mrrkinect(orignal)\mrrkinect\kinectcalibration.cpp(85): warning C4789: destination of memory copy is too small
+         Finished generating code
+         MRRKinect.vcxproj -> D:\My Documents\Visual Studio 2010\Projects\(20111028)MRRKinect(Orignal)\MRRKinect(Orignal)\Release\MRRKinect.exe
+       Manifest:
+         e:\Program Files\Microsoft SDKs\Windows\v7.0A\bin\mt.exe /nologo /verbose /outputresource:"D:\My Documents\Visual Studio 2010\Projects\(20111028)MRRKinect(Orignal)\MRRKinect(Orignal)\Release\MRRKinect.exe;#1" /manifest Release\MRRKinect.exe.intermediate.manifest "e:\Common Softwares\Microsoft Visual Studio 10.0\VC\Include\Manifest\dpiaware.manifest"
+       FinalizeBuildStatus:
+         Deleting file "Release\MRRKinect.unsuccessfulbuild".
+         Touching "Release\MRRKinect.lastbuildstate".
+     1>Done Building Project "D:\My Documents\Visual Studio 2010\Projects\(20111028)MRRKinect(Orignal)\MRRKinect(Orignal)\MRRKinect\MRRKinect.vcxproj" (build target(s)).
+
+Build succeeded.
+
+Time Elapsed 00:00:38.74

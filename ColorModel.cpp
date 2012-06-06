@@ -31,14 +31,15 @@ double ColorModel::operator[](unsigned int bin)
 	return m_Model[bin];
 }
 
-unsigned int ColorModel::findBin(unsigned char H)
+unsigned int ColorModel::findBin( unsigned char H, unsigned char V )
 {
 	//return the color index.
 	//Range - 0-31
 	unsigned int colorId; 
-	colorId = (unsigned int)floor( (float)(H/BINSIZE) );
+	unsigned int hId = (unsigned int)floor( (float)(H/BINSIZEH) );
+	unsigned int vId = (unsigned int)floor( (float)(V/BINSIZEV) );
 
-	return colorId;
+	return (hId*16+vId);
 }
 
 void ColorModel::updateModel(BaseBuf* imgHSV, int cx, int cy, int half_x, int half_y, Kernel* kernel)
@@ -56,9 +57,22 @@ void ColorModel::updateModel(BaseBuf* imgHSV, int cx, int cy, int half_x, int ha
 			bins[i] = new unsigned int[m_nYDim];
 		binsInit = true;
 	}
-	BYTE* pImg;
+	BYTE* pImg = new BYTE;
 	unsigned char Hval;
+	unsigned char Vval;
 
+	if(m_nXDim!=2*half_x||m_nYDim!=2*half_y)
+	{
+		for(int i=0;i<m_nXDim; i++)
+			delete [] bins[i];
+		delete [] bins;
+				m_nXDim = 2*half_x;
+		m_nYDim = 2*half_y;
+		bins = new unsigned int*[m_nXDim];
+		for(int i=0;i<m_nXDim; i++)
+			bins[i] = new unsigned int[m_nYDim];
+
+	}
 	//update a bin allocation given the current frame of HSV image
 	for(int j = -half_y;j<half_y;j++)	
 	{	
@@ -66,9 +80,11 @@ void ColorModel::updateModel(BaseBuf* imgHSV, int cx, int cy, int half_x, int ha
 		for(int i = -half_x;i< half_x;i++)
 		{
 			nOffsetX = i + cx;
-			pImg = imgHSV->getData() + nOffsetY*imgHSV->widthBytes() + nOffsetX*3;
-			Hval = *(pImg+2);
-			bins[i+half_x][j+half_y] = findBin(Hval);
+			//pImg = imgHSV->getData() + nOffsetY*imgHSV->widthBytes() + nOffsetX*3;
+			imgHSV->getPixelAt(nOffsetY, nOffsetX, pImg);
+			Hval = pImg[2];
+			Vval = pImg[0];
+			bins[i+half_x][j+half_y] = findBin(Hval, Vval);
 			m_Model[bins[i+half_x][j+half_y]] += (kernel->getKernel())[i+half_x][j+half_y];
 		}
 	}
@@ -82,6 +98,8 @@ void ColorModel::updateModel(BaseBuf* imgHSV, int cx, int cy, int half_x, int ha
 	{
 		m_Model[i] /= total;
 	}
+	//if(pImg!=NULL)
+	//	delete pImg;
 }
 
 unsigned int ColorModel::theBin(unsigned int x, unsigned int y)

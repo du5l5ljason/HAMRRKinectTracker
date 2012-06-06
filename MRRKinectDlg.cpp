@@ -2,13 +2,15 @@
 // MRRKinectDlg.cpp : implementation file
 //
 #include "stdafx.h"
+#include <afxwin.h>
 #include "MRRKinect.h"
 #include "MRRKinectDlg.h"
-#include "afxdialogex.h"
+#include <afxdialogex.h>
 
 //for test
-#include "windows.h"
-#include "time.h"
+#define _WINSOCKAPI_
+#include <windows.h>
+#include <time.h>
 #include <stdio.h>
 #include <iostream>
 #include <ctime>
@@ -18,14 +20,75 @@ using namespace std;
 #define new DEBUG_NEW
 #endif
 #define	_JOINT_RHAND 15
+#define maxFrameNum 10000
 
 bool g_RunKinect = true;
 HANDLE g_hKinectThread;
-extern int gnPointMode;
-int gnSystemStatus = 2;
+int gnPointMode=1;
+int gnSystemStatus = _SS_REST;
+int gCalibStatus = 0;
+#if defined(_MSC_VER) || defined(_MSC_EXTENSIONS)
+  #define DELTA_EPOCH_IN_MICROSECS  11644473600000000Ui64
+#else
+  #define DELTA_EPOCH_IN_MICROSECS  11644473600000000ULL
+#endif
 
-//Edited by Tingfang, 10/31/2011
+struct timezone
+{
+  int  tz_minuteswest; /* minutes W of Greenwich */
+  int  tz_dsttime;     /* type of dst correction */
+};
 
+// Definition of a gettimeofday function
+ 
+void getTimeofDay(struct timeval *tv, struct timezone *tz)
+{
+// Define a structure to receive the current Windows filetime
+  FILETIME ft;
+ 
+// Initialize the present time to 0 and the timezone to UTC
+  unsigned __int64 tmpres = 0;
+  static int tzflag = 0;
+ 
+  if (NULL != tv)
+  {
+    GetSystemTimeAsFileTime(&ft);
+ 
+// The GetSystemTimeAsFileTime returns the number of 100 nanosecond 
+// intervals since Jan 1, 1601 in a structure. Copy the high bits to 
+// the 64 bit tmpres, shift it left by 32 then or in the low 32 bits.
+    tmpres |= ft.dwHighDateTime;
+    tmpres <<= 32;
+    tmpres |= ft.dwLowDateTime;
+ 
+// Convert to microseconds by dividing by 10
+    tmpres /= 10;
+ 
+// The Unix epoch starts on Jan 1 1970.  Need to subtract the difference 
+// in seconds from Jan 1 1601.
+    tmpres -= DELTA_EPOCH_IN_MICROSECS;
+ 
+// Finally change microseconds to seconds and place in the seconds value. 
+// The modulus picks up the microseconds.
+    tv->tv_sec = (long)(tmpres / 1000000UL);
+    tv->tv_usec = (long)(tmpres % 1000000UL);
+  }
+ 
+  if (NULL != tz)
+  {
+    if (!tzflag)
+    {
+      _tzset();
+      tzflag++;
+    }
+  
+// Adjust for the timezone west of Greenwich
+      tz->tz_minuteswest = _timezone / 60;
+    tz->tz_dsttime = _daylight;
+  }
+ 
+  return;
+}
 // CAboutDlg dialog used for App About
 
 class CAboutDlg : public CDialogEx
@@ -63,10 +126,10 @@ CMRRKinectDlg::CMRRKinectDlg(CWnd* pParent /*=NULL*/)
 	: CDialogEx(CMRRKinectDlg::IDD, pParent)
 {
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
-	m_pHandTracker = new HandTrackMeanShift(640,480);
 	m_pImgProc = new ImageProc;
 	m_pModel = new ColorModel;
 	m_pCalib = new KinectCalibration;
+
 }
 
 void CMRRKinectDlg::DoDataExchange(CDataExchange* pDX)
@@ -87,6 +150,11 @@ BEGIN_MESSAGE_MAP(CMRRKinectDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_BUTTON_TRACK, &CMRRKinectDlg::OnBnClickedButtonTrack)
 	ON_BN_CLICKED(IDC_BUTTON_RESET, &CMRRKinectDlg::OnBnClickedButtonReset)
 	ON_BN_CLICKED(IDC_BUTTON_SETMODEL, &CMRRKinectDlg::OnBnClickedButtonSetmodel)
+	ON_BN_CLICKED(IDC_BUTTON_ARCHIVE, &CMRRKinectDlg::OnBnClickedButtonArchive)
+	ON_BN_CLICKED(IDC_BUTTON_ENDARCHIVE, &CMRRKinectDlg::OnBnClickedButtonEndarchive)
+	ON_BN_CLICKED(IDC_BUTTON_SAVECALIB, &CMRRKinectDlg::OnBnClickedButtonSavecalib)
+	ON_BN_CLICKED(IDC_BUTTON_TESTCALIB, &CMRRKinectDlg::OnBnClickedButtonTestcalib)
+	ON_BN_CLICKED(IDC_BUTTON_RESETCALIB, &CMRRKinectDlg::OnBnClickedButtonResetcalib)
 END_MESSAGE_MAP()
 
 
@@ -124,6 +192,7 @@ BOOL CMRRKinectDlg::OnInitDialog()
 	// TODO: Add extra initialization here
 	InitImgWnd();
 	InitKinect();
+
 
 	return TRUE;  // return TRUE  unless you set the focus to a control
 }
@@ -218,21 +287,7 @@ void CMRRKinectDlg::InitImgWnd() {
 	ScreenToClient( rect );
 	m_slider3 = new CSliderCtrl();
 	m_slider3->Create( WS_VISIBLE, rect, this, IDC_SLIDER3 );
-
-	GetDlgItem( IDC_SLIDER4 )->GetWindowRect( rect );
-	ScreenToClient( rect );
-	m_slider4 = new CSliderCtrl();
-	m_slider4->Create( WS_VISIBLE, rect, this, IDC_SLIDER4 );
-
-	GetDlgItem( IDC_SLIDER5 )->GetWindowRect( rect );
-	ScreenToClient( rect );
-	m_slider5 = new CSliderCtrl();
-	m_slider5->Create( WS_VISIBLE, rect, this, IDC_SLIDER5 );
-
-	GetDlgItem( IDC_SLIDER6 )->GetWindowRect( rect );
-	ScreenToClient( rect );
-	m_slider6 = new CSliderCtrl();
-	m_slider6->Create( WS_VISIBLE, rect, this, IDC_SLIDER6 );
+	
 	//Test Code Ends, 10/30
 }
 
@@ -257,99 +312,182 @@ DWORD WINAPI ShowStreams(LPVOID lpParam) {
 	fullWnd->ShowImg(w,h,wb,kinect->getRGBImg()->getData());
 	//fullWnd->ShowImg(w,h,wb,dlg->getBG()->getRgbBG()->getData());
 
-	//fullWnd->ShowImg(w, h, wb, dlg->getHandTracker()->getImg()->getData());
+	//fullWnd->ShowImg(w, h, wb, dlg->getHandTrackData()->getImg()->getData());
 	//Test Code ends
-	fullWnd->showSkeleton(dlg->getSkeleton()->getJointPos());
-	fullWnd->showHandJoint(dlg->getHandTracker()->getHandPos());
-	
+	Rect modRect;
+	modRect.x = MODEL_StartX - (int)(MODEL_W/2);
+	modRect.y = MODEL_StartY - (int)(MODEL_H/2);
+	modRect.width = MODEL_W;
+	modRect.height = MODEL_H;
+
+	fullWnd->showRect( modRect );
+
+	if(dlg->getSkeleton()->update())
+	{
+		if(dlg->getHandTrackData()->isReady())
+			dlg->getSkeleton()->setJointPosAt(XN_SKEL_RIGHT_HAND, dlg->getHandTrackData()->getHandPos(), 1.0f);			//set hand position to the skeleton.
+		fullWnd->showSkeleton(dlg->getSkeleton()->getJointPos());
+	}
+	fullWnd->showHandJoint(dlg->getHandTrackData()->getHandPos());
 	fullWnd->Invalidate();
-	
+
 	return 0;
 }
 
 DWORD WINAPI KinectThread(LPVOID lpParam) {
 	CMRRKinectDlg* dlg = (CMRRKinectDlg*)(lpParam);
 	KinectOpenNI* kinect = dlg->getKinect();
+	KinectCalibration* calib = dlg->getCalibration();
 	Background* bg = dlg->getBG();
-	HandTrackMeanShift* handTrack = dlg->getHandTracker();
 	KinectSkeletonOpenNI* skeleton = dlg->getSkeleton();
-	
-	//for debug, time duration per frame
-	clock_t t_start, t_finish;
-	//debug code ends
-	int nCenterX = 0;
-	int nCenterY = 0;
+	KSHandTrackDataUsingMeanShift* handData = dlg->getHandTrackData();
+	KSTorsoData* torsoData = dlg->getTorsoData();
+	KSFrameData* frameData = dlg->getFrameData();
+	KSElbowData* elbowData = dlg->getElbowData();
+	KSArchivingData* archiveData = dlg->getArchivingData();
 
+	//debug code ends
+	int nCenterX = MODEL_StartX;
+	int nCenterY = MODEL_StartY;
+	struct timeval timeStamp;
+	double lastFrameTime = 0.0f;
+	double currentFrameTime = 0.0f;
+	int frameID = 0;
+	KSFrameDataSender sender;
+
+	sender.openServer();
 	while(g_RunKinect) {
 
-		t_start = clock();		//debug code
-		kinect->update();
+		lastFrameTime = currentFrameTime;
+		frameID = frameID + 1;
 
-		switch(gnSystemStatus){
+		kinect->update();
+		skeleton->update();
+
+		//if(skeleton->update() )
+		//	dlg->getFilter()->smoothSkeleton( skeleton );
+		//if(!bg->isBG())
+		//{
+		//	bg->init(kinect->getRGBImg(), kinect->getDepthImg()); //将背景文件拷进去
+		//}
+
+		switch( gnSystemStatus ){
 			case _SS_REST: break;
-			case _SS_CALIB: dlg->getCalibration()->Calibrate(kinect->getRGBImg(),kinect->getDepthImg(), kinect->getDepthGenerator());break;
+			case _SS_CALIB:
+				{
+
+					switch( gCalibStatus ){
+						case 0:
+							calib->startCalib(kinect->getRGBImg(),kinect->getDepthImg(), kinect->getDepthGenerator());break;
+						case 1:
+							calib->testCalib(kinect->getRGBImg(),kinect->getDepthImg(), kinect->getDepthGenerator());break;	
+						default:
+							AfxMessageBox(_T("Please choose Calibration Status"));break;
+					}
+				}
 			case _SS_TRACK:	
 				{
-					if(!bg->isBG())
+					if( skeleton->update()&&handData->isReady()&&torsoData->isReady()&&elbowData->isReady() )
 					{
-						bg->init(kinect->getRGBImg(), kinect->getDepthImg()); //将背景文件拷进去
-					}
-
-					skeleton->update();
-					nCenterX = skeleton->getJointPosAt(_JOINT_RHAND).x;
-					nCenterY = skeleton->getJointPosAt(_JOINT_RHAND).y;
-					if(gnPointMode==2)
-					{
-						nCenterX = dlg->getHandTracker()->getHandPos().x;		//Last frame position
-						nCenterY = dlg->getHandTracker()->getHandPos().y;
-					}
-
-					//Comment: 2/2/2012
-					//We need to first use the skeleton hand position, 
-					//if the mean shift algorithm can successfully get a hand position, we use last frame position
-					//if not, we return to use skeleton hand position.
-					//How to determine this? calculate the BHattya distance, if the BD of the convergent point is lower than a threshold, we return success; else return false
-					if( bg->isBG() && skeleton->update() )
-					{
-						handTrack->track(						
+						nCenterX = handData->getHandPos().x;
+						nCenterY = handData->getHandPos().y;
+						//The new interfaces 4.12/
+						//------------
+						//UPDATE DATA
+						//------------
+						//1. handData 2. torsoData 3. elbowData 
+						handData->update(						
 							kinect->getRGBImg(),
 							kinect->getDepthImg(),
-							bg->getRgbBG(),
-							bg->getDepthBG(),
-							nCenterX,			//Modified later
+							nCenterX,			
 							nCenterY,
-							ROI_SIZE_W,
+							ROI_SIZE_W,																		//4.12 Can we change the ROI size depending on the tracking performance? if tracking lost, 
 							ROI_SIZE_H
 						);
-						//POINT3D p3DHandPos = dlg->getCalibration()->cvtIPtoGP(dlg->getHandTracker()->getHandPos(),kinect->getDepthGenerator());
-						//cout << "HandPosition in L frame Coordinate: (X,Y,Z) = " << p3DHandPos.x << ", " << p3DHandPos.y << ", " << p3DHandPos.z << endl;
-						//Should be moved to the tracking module
+						POINT3D p3DHandPos = calib->cvtIPtoGP(handData->getHandPos(),kinect->getDepthGenerator());
+						dlg->getSkeleton()->setJoint3DPosAt(XN_SKEL_RIGHT_HAND, p3DHandPos, 1.0f);						//set hand position to the skeleton.
+						torsoData->update( kinect->getDepthImg(), skeleton, calib, kinect->getDepthGenerator() );
+						elbowData->update( skeleton, kinect->getDepthGenerator());
+						getTimeofDay(&timeStamp, NULL);
+						currentFrameTime = timeStamp.tv_sec + (timeStamp.tv_usec/1000000.0);						
+						
+						frameData->update(frameID, 
+							currentFrameTime,
+							p3DHandPos.x,
+							p3DHandPos.y,
+							p3DHandPos.z,
+							torsoData->getTorsoComps(),
+							elbowData->getElbowOpening()
+							);																				//if tracking is success, we record the data, frame data updates.
+
+						sender.getData()->update(
+							frameData->getFrameID(),
+							frameData->getTimestamp(),
+							frameData->getHandX(),
+							frameData->getHandY(),
+							frameData->getHandZ(),
+							frameData->getTorsoZComp(),
+							frameData->getElbowOpen()
+							);
+
+						sender.sendData();
+
+						if( archiveData->isArchiving())
+							archiveData->addAFrame(dlg->getFrameData());
+						
+						//------------
+						//DISPLAY DATA
+						//------------
+						CString str;
+						//str.Format(_T("%lf"), p3DHandPos.x);
+						//dlg->SetDlgItemText(IDC_EDIT9, str);
+						//str.Format(_T("%lf"), p3DHandPos.y);
+						//dlg->SetDlgItemText(IDC_EDIT10, str);
+						//str.Format(_T("%lf"), p3DHandPos.z);
+						//dlg->SetDlgItemText(IDC_EDIT11, str);
+						str.Format(_T("%lf"), dlg->getTorsoData()->getTorsoComps());
+						dlg->SetDlgItemText(IDC_EDIT12, str);
+						str.Format(_T("%lf"), dlg->getElbowData()->getElbowOpening());
+						dlg->SetDlgItemText(IDC_EDIT13, str);
 					}
 
 					break;
 				}
 		}
-		//debug code
-
-	
 
 		HANDLE hShowStreams = CreateThread(NULL, 0, ShowStreams, dlg, 0, NULL);
 		WaitForSingleObject(hShowStreams, INFINITE);
-		t_finish = clock();
+		getTimeofDay(&timeStamp, NULL);
+		currentFrameTime = timeStamp.tv_sec + (timeStamp.tv_usec/1000000.0);
+		
+		//Display Data info
 		CString str;
-		str.Format(_T("%f"), (double)(t_finish-t_start)/CLOCKS_PER_SEC);
-		dlg->SetDlgItemText(IDC_EDIT7, str);
+		str.Format(_T("%d"), frameID);
+		dlg->SetDlgItemText(IDC_EDIT4, str);
+		str.Format(_T("%lf"), 1.0f/(currentFrameTime-lastFrameTime));
+		dlg->SetDlgItemText(IDC_EDIT5, str);
+
 	}
+	sender.closeServer();
 	return 0;
 }
 
 void CMRRKinectDlg::InitKinect() {
+	
 	kinect.init();
+
 	int nWidth = kinect.getRGBImg()->width();
-	int nHeight = kinect.getRGBImg()->height(); 
+	int	nHeight = kinect.getRGBImg()->height(); 
 	m_pBG = new Background(nWidth,nHeight);	//Is it good to put it here?
 	m_pSkeleton = new KinectSkeletonOpenNI(kinect.getContext(), kinect.getDepthGenerator(), 24);
 	
+	m_pFrameData = new KSFrameData;
+	m_pHandTrackData = new KSHandTrackDataUsingMeanShift(nWidth,nHeight);
+	m_pTorsoData = new KSTorsoData;
+	m_pElbowData = new KSElbowData;
+	m_pArchivingData = new KSArchivingData;
+
+	m_pFilter = new KSUtilsMAFilter(2);
 	kinect.open();
 
 	g_hKinectThread = CreateThread(NULL, 0, KinectThread, this, 0, NULL);
@@ -366,9 +504,7 @@ void CMRRKinectDlg::OnBnClickedCancel()
 void CMRRKinectDlg::OnBnClickedButtonGreen()
 {
 	// TODO: Add your control notification handler code here
-	//Test Code, Edited by Tingfang, 10/30
-	//m_pHandTracker->setColorMode(_CM_PINK);
-	gnPointMode = 1;
+
 	CString str;
 	m_slider1->SetRange(0,255);
 	m_slider1->SetPos(191);
@@ -388,25 +524,6 @@ void CMRRKinectDlg::OnBnClickedButtonGreen()
 	str.Format(_T("%d"), m_pCalib->getValue3());
 	SetDlgItemText(IDC_EDIT3, str);
 
-	m_slider4->SetRange(0,100);
-	m_slider4->SetPos(33);
-	m_pCalib->setRangeV1(m_slider4->GetPos());
-	str.Format(_T("%d"), m_pCalib->getRangeV1());
-	SetDlgItemText(IDC_EDIT4, str);
-
-	m_slider5->SetRange(0,100);
-	m_slider5->SetPos(81);
-
-	m_pCalib->setRangeV2(m_slider5->GetPos());
-	str.Format(_T("%d"), m_pCalib->getRangeV2());
-	SetDlgItemText(IDC_EDIT5, str);
-
-	m_slider6->SetRange(0,100);
-	m_slider6->SetPos(92);
-
-	m_pCalib->setRangeV3(m_slider6->GetPos());
-	str.Format(_T("%d"), m_pCalib->getRangeV3());
-	SetDlgItemText(IDC_EDIT6, str);
 	//Test Code ends.
 }
 
@@ -414,18 +531,16 @@ void CMRRKinectDlg::OnBnClickedButtonBlack()
 {
 	// TODO: Add your control notification handler code here
 	//Test Code, Edited by Tingfang, 10/30	
-	gnPointMode = 2;
-	//m_pHandTracker->setColorMode(_CM_BLACK);
 
 	CString str;
 	m_slider1->SetRange(0,255);
-	m_slider1->SetPos(166);
+	m_slider1->SetPos(234);
 	m_pCalib->setValue1(m_slider1->GetPos());
 	str.Format(_T("%d"), m_pCalib->getValue1());
 	SetDlgItemText(IDC_EDIT1, str);
 
 	m_slider2->SetRange(0,255);
-	m_slider2->SetPos(159);
+	m_slider2->SetPos(170);
 	m_pCalib->setValue2(m_slider2->GetPos());
 	str.Format(_T("%d"), m_pCalib->getValue2());
 	SetDlgItemText(IDC_EDIT2, str);
@@ -436,24 +551,7 @@ void CMRRKinectDlg::OnBnClickedButtonBlack()
 	str.Format(_T("%d"), m_pCalib->getValue3());
 	SetDlgItemText(IDC_EDIT3, str);
 
-	m_slider4->SetRange(0,100);
-	m_slider4->SetPos(40);
-	m_pCalib->setRangeV1(m_slider4->GetPos());
-	str.Format(_T("%d"), m_pCalib->getRangeV1());
-	SetDlgItemText(IDC_EDIT4, str);
-
-	m_slider5->SetRange(0,100);
-	m_slider5->SetPos(40);
-	m_pCalib->setRangeV2(m_slider5->GetPos());
-	str.Format(_T("%d"), m_pCalib->getRangeV2());
-	SetDlgItemText(IDC_EDIT5, str);
-
-	m_slider6->SetRange(0,100);
-	m_slider6->SetPos(100);
-	m_pCalib->setRangeV3(m_slider6->GetPos());
-	str.Format(_T("%d"), m_pCalib->getRangeV3());
-	SetDlgItemText(IDC_EDIT6, str);
-	//Test code ends.
+	////Test code ends.
 }
 
 void CMRRKinectDlg::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
@@ -520,6 +618,7 @@ void CMRRKinectDlg::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 void CMRRKinectDlg::OnMouseMove(UINT nFlags, CPoint point)
 {
 	// TODO: Add your message handler code here and/or call default
+
 }
 
 BOOL CMRRKinectDlg::PreTranslateMessage(MSG* pMsg)
@@ -529,35 +628,40 @@ BOOL CMRRKinectDlg::PreTranslateMessage(MSG* pMsg)
 	{
 		CPoint point;
 		GetCursorPos(&point);
-		
+		ScreenToClient( &point );
 		CRect rect;
 		float h,s,v; 
-		GetDlgItem( IDC_FULLFRAME )->GetClientRect( rect );
-		GetDlgItem( IDC_FULLFRAME )->ClientToScreen( rect );
+		GetDlgItem( IDC_FULLFRAME )->GetWindowRect( &rect );
+		ScreenToClient( &rect );
+		point.x = point.x - rect.TopLeft().x-4;
+		point.y = point.y - rect.TopLeft().y-11;
 
-		if(point.x>rect.left && point.x<rect.right && point.y>rect.top && point.y<rect.bottom)
-		{
-			HDC hDC = ::GetDC(NULL);
-			COLORREF color;
+		//@Tingfang 6/5/2012
+		//if(pMsg->message == WM_LBUTTONDOWN)&& in calibration mode
+			//if( m_Calib!=NULL )
+			//pImgSet[0],pImgSet[1], pImgSet[2] Global
+			//
+		//if(point.x>0 && point.x<640 && point.y>0 && point.y<480)
+		//{
+		//	HDC hDC = ::GetDC(NULL);
+		//	COLORREF color;
 
-			color = GetPixel(hDC, point.x, point.y); //If you move the dialog window, the position is not accurate.
-			int r = GetRValue(color);
-			int g = GetGValue(color);
-			int b = GetBValue(color);
-			
-			//Test code, Edited 11/3, for test to check the value of h,s,v
-			m_pImgProc->rgb2hsv(b,g,r,v,s,h);
-			CString szColor;
-			//szColor.Format(_T("%d, %d, %d"), r,g,b);
-			szColor.Format(_T("%d, %d, %d"), (int)h,(int)s,(int)v);
-			SetDlgItemText(IDC_EDIT8, szColor);
-		}
-		else
-		{
-		}
+		//	color = GetPixel(hDC, point.x, point.y); //If you move the dialog window, the position is not accurate.
+		//	int r = GetRValue(color);
+		//	int g = GetGValue(color);
+		//	int b = GetBValue(color);
+		//	
+		//	//Test code, Edited 11/3, for test to check the value of h,s,v
+		//	m_pImgProc->rgb2hsv(b,g,r,v,s,h);
+		//	//CString szColor;
+		//	//szColor.Format(_T("%d, %d, %d"), r,g,b);
+		//	//szColor.Format(_T("%d, %d, %d"), (int)h,(int)s,(int)v);
+		//	SetDlgItemText(IDC_EDIT8, szColor);
+		//}
+		//else
+		//{
+		//}
 		
-		point.x = point.x - 482; //600 offset + 8 nboarder
-		point.y = point.y - 99;  //12 offset + 18 nboarder, Problem, how to get positions invariant to window movement?
 		CString szPos;
 		szPos.Format(_T("%d, %d"),point.x,point.y);
 		SetDlgItemText(IDC_EDIT7, szPos);
@@ -575,25 +679,82 @@ BOOL CMRRKinectDlg::PreTranslateMessage(MSG* pMsg)
 void CMRRKinectDlg::OnBnClickedButtonCalib()
 {
 	// TODO: Add your control notification handler code here
-	gnSystemStatus = 1;
+	gnSystemStatus = _SS_CALIB;
 }
 
 void CMRRKinectDlg::OnBnClickedButtonTrack()
 {
 	// TODO: Add your control notification handler code here
-	gnSystemStatus = 2;
+	gnSystemStatus = _SS_TRACK;
 }
 
 void CMRRKinectDlg::OnBnClickedButtonReset()
 {
 	// TODO: Add your control notification handler code here
-	gnSystemStatus = 0;
+	gnSystemStatus = _SS_REST;
 }
-
 
 void CMRRKinectDlg::OnBnClickedButtonSetmodel()
 {
 	// TODO: Add your control notification handler code here
-	if(m_pHandTracker!=NULL)
-		m_pHandTracker->setShouldInit(true);
+	if(m_pHandTrackData!=NULL)
+		m_pHandTrackData->setReady(true);
+	if(m_pTorsoData!=NULL)
+		m_pTorsoData->setReady(true);
+	if(m_pElbowData!=NULL)
+		m_pElbowData->setReady(true);
+
+	POINT3D torso2DPos,torso3DPos;
+	torso2DPos.x = (m_pSkeleton->getJointPosAt(XN_SKEL_LEFT_SHOULDER).x + m_pSkeleton->getJointPosAt(XN_SKEL_RIGHT_SHOULDER).x )/2;
+	torso2DPos.y = (m_pSkeleton->getJointPosAt(XN_SKEL_LEFT_SHOULDER).y + m_pSkeleton->getJointPosAt(XN_SKEL_RIGHT_SHOULDER).y )/2;
+	torso2DPos.z = 0.0f;
+	torso3DPos.x = (m_pSkeleton->getJoint3DPosAt(XN_SKEL_LEFT_SHOULDER).x + m_pSkeleton->getJoint3DPosAt(XN_SKEL_RIGHT_SHOULDER).x )/2;
+	torso3DPos.y = (m_pSkeleton->getJoint3DPosAt(XN_SKEL_LEFT_SHOULDER).y + m_pSkeleton->getJoint3DPosAt(XN_SKEL_RIGHT_SHOULDER).y )/2;
+	torso3DPos.z = (m_pSkeleton->getJoint3DPosAt(XN_SKEL_LEFT_SHOULDER).z + m_pSkeleton->getJoint3DPosAt(XN_SKEL_RIGHT_SHOULDER).z )/2;
+
+	m_pTorsoData->setCurrentPos( torso2DPos );
+	m_pTorsoData->setRestPos( torso3DPos );
+	m_pHandTrackData->setInit( false );
+	
+	POINT3D RestHandPos = m_pCalib->cvtIPtoCamP(m_pHandTrackData->getHandPos(),kinect.getDepthGenerator());
+	m_pHandTrackData->setRestPosDepth(torso3DPos.z);
+	gnPointMode = 2;
+}
+
+void CMRRKinectDlg::OnBnClickedButtonArchive()
+{
+	// TODO: Add your control notification handler code here
+	//if no data, return;
+	if( m_pArchivingData != NULL )
+		m_pArchivingData->setIsArchiving(true);
+}
+
+void CMRRKinectDlg::OnBnClickedButtonEndarchive()
+{
+	// TODO: Add your control notification handler code here
+	if( m_pArchivingData != NULL )
+	{
+		m_pArchivingData->saveArchivingData();
+		m_pArchivingData->setIsArchiving(false);
+	}	
+}
+
+void CMRRKinectDlg::OnBnClickedButtonSavecalib()
+{
+	// TODO: Add your control notification handler code here
+	//if(gnSystemStatus!=_SS_CALIB) return;		
+	m_pCalib->saveCalibrationDatatoFile();
+	cout << "Coordinate set, please test" << endl;
+}
+
+void CMRRKinectDlg::OnBnClickedButtonTestcalib()
+{
+	// TODO: Add your control notification handler code here
+	gCalibStatus = 1;
+}
+
+void CMRRKinectDlg::OnBnClickedButtonResetcalib()
+{
+	// TODO: Add your control notification handler code here
+	gCalibStatus = 0;
 }

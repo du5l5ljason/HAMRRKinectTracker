@@ -4,27 +4,33 @@
 
 #pragma once
 
+#include <XnCppWrapper.h>
 #include "ImgWnd.h"
 #include "DrawWnd.h"
 #include "KinectSensor.h"
+#include "KinectSensorOpenNI.h"
 #include "KinectSkeletonOpenNI.h"
-#include "HandTrack.h"
 #include "KinectCalibration.h"
-#include "HandTrackMeanShift.h"
+#include "KSUtilsFilter.h"
+#include "KSUtilsMAFilter.h"
 #include "Background.h"
 #include "ImageProc.h"
+#include "UserTypes.h"
+#include "UserConfigs.h"
+#include "KSHandTrackData.h"
+#include "KSHandTrackDataUsingMeanShift.h"
+#include "KSTorsoData.h"
+#include "KSElbowData.h"
+#include "KSFrameData.h"
+#include "KSArchivingData.h"
+#include "KSFrameDataSender.h"
+
 //For test
 #include "ColorModel.h"
 
-enum POINTMODE{
-	_PM_SKEL,
-	_PM_LAST,
-};
-enum SYMSTATUS{
-	_SS_REST,
-	_SS_CALIB,
-	_SS_TRACK,
-};
+
+
+using namespace xn;
 // CMRRKinectDlg dialog
 class CMRRKinectDlg : public CDialogEx
 {
@@ -41,43 +47,59 @@ private:
 	CSliderCtrl* m_slider5;
 	CSliderCtrl* m_slider6;
 	
-	KinectSkeletonOpenNI* m_pSkeleton;
-	HandTrackMeanShift* m_pHandTracker;
-	Background* m_pBG;
-	KinectOpenNI kinect;
-	KinectCalibration* m_pCalib;
-	ImageProc* m_pImgProc;
-
+	KinectSkeletonOpenNI*	m_pSkeleton;
+	Background*				m_pBG;
+	KinectOpenNI			kinect;
+	KinectCalibration*		m_pCalib;
+	KSUtilsFilter*			m_pFilter;
+	ImageProc*				m_pImgProc;
+	KSHandTrackDataUsingMeanShift* m_pHandTrackData;
+	KSTorsoData*			m_pTorsoData;
+	KSElbowData*			m_pElbowData;
+	KSFrameData*			m_pFrameData;
+	KSArchivingData*		m_pArchivingData;
 	//For test
-	ColorModel* m_pModel;
+	ColorModel*				m_pModel;
 	void InitImgWnd();
 	void InitKinect();
 
 public:
 
-	KinectOpenNI* getKinect(){return &kinect;}
-	CImgWnd* getRGBWnd(){return &m_wndRGB;}
-	CImgWnd* getDepthWnd(){return &m_wndDepth;}
-	CImgWnd* getFullWnd(){return m_wndFull;}
-	Background* getBG(){return m_pBG;};
-	KinectSkeletonOpenNI* getSkeleton(){return m_pSkeleton;}
-	HandTrackMeanShift* getHandTracker(){return m_pHandTracker;};
-	KinectCalibration* getCalibration(){return m_pCalib;};
-	ImageProc* getImgProc(){return m_pImgProc;};
+	KinectOpenNI*			getKinect(){return &kinect;}
+	CImgWnd*				getRGBWnd(){return &m_wndRGB;}
+	CImgWnd*				getDepthWnd(){return &m_wndDepth;}
+	CImgWnd*				getFullWnd(){return m_wndFull;}
+	Background*				getBG(){return m_pBG;};
+	KSUtilsFilter*			getFilter(){return m_pFilter;};
+	KinectSkeletonOpenNI*	getSkeleton(){return m_pSkeleton;}
+	KSHandTrackDataUsingMeanShift* getHandTrackData(){return m_pHandTrackData;};
+	KinectCalibration*		getCalibration(){return m_pCalib;};
+	ImageProc*				getImgProc(){return m_pImgProc;};
+	KSTorsoData*			getTorsoData(){return m_pTorsoData;};
+	KSElbowData*			getElbowData(){return m_pElbowData;};
+	KSFrameData*			getFrameData(){return m_pFrameData;};
+	KSArchivingData*		getArchivingData(){return m_pArchivingData;};
 	//For test
-	ColorModel* getModel(){return m_pModel;};
+	ColorModel*				getModel(){return m_pModel;};
 
+//Methods
+	
 // Construction
 public:
 	CMRRKinectDlg(CWnd* pParent = NULL);	// standard constructor
 	~CMRRKinectDlg(void){
-		delete m_wndFull;
-		delete m_pSkeleton;
-		delete m_pHandTracker;
-		delete m_pBG;
-		delete m_pImgProc;
-		delete m_pModel;
-		delete m_pCalib;
+		if(m_wndFull!=NULL)delete m_wndFull;
+		if(m_pSkeleton!=NULL)delete m_pSkeleton;
+		if(m_pHandTrackData!=NULL)delete m_pHandTrackData;
+		if(m_pBG!=NULL)delete m_pBG;
+		if(m_pFilter!=NULL)delete m_pFilter;
+		if(m_pImgProc!=NULL)delete m_pImgProc;
+		if(m_pModel!=NULL)delete m_pModel;
+		if(m_pCalib!=NULL)delete m_pCalib;
+		if(m_pTorsoData!=NULL)delete m_pTorsoData;
+		if(m_pFrameData!=NULL)delete m_pFrameData;
+		if(m_pArchivingData!=NULL)delete m_pArchivingData;
+
 		delete m_slider1, m_slider2, m_slider3,  m_slider4,  m_slider5,  m_slider6;
 	}
 // Dialog Data
@@ -107,4 +129,12 @@ public:
 	afx_msg void OnBnClickedButtonTrack();
 	afx_msg void OnBnClickedButtonReset();
 	afx_msg void OnBnClickedButtonSetmodel();
+	afx_msg void OnBnClickedButtonCalib2();
+	afx_msg void OnBnClickedButtonArchive();
+	afx_msg void OnBnClickedButtonEndarchive();
+	afx_msg void OnBnClickedButtonSavecalib();
+	afx_msg void OnBnClickedButton3();
+	afx_msg void OnBnClickedButtonTestcalib();
+	afx_msg void OnBnClickedButtonSavecalib2();
+	afx_msg void OnBnClickedButtonResetcalib();
 };

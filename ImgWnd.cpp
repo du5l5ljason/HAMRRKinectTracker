@@ -4,7 +4,6 @@
 #include "stdafx.h"
 #include "ImgWnd.h"
 
-#define MAX_DEPTH 4096
 // CImgWnd
 
 IMPLEMENT_DYNAMIC(CImgWnd, CWnd)

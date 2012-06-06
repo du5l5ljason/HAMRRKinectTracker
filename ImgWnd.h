@@ -4,8 +4,8 @@
 // CImgWnd
 
 #include "DIBDC.h"
-#include "StructDefine.h"
-
+#include "UserTypes.h"
+#include "UserConfigs.h"
 class CImgWnd : public CWnd
 {
 	DECLARE_DYNAMIC(CImgWnd)
@@ -27,6 +27,7 @@ public:
 	void showLine(int x1, int y1, int x2, int y2, int color[]);
 	void showEllipse(int x1, int y1, int x2, int y2, int color[]);
 
+	virtual void showRect(Rect rect){};
 	virtual void showSkeleton(POINT3D* jointPos){};
 	virtual void showHandJoint(POINT3D RightPos){};
 	virtual void showHandJoint(POINT3D leftPos, POINT3D RightPos){};

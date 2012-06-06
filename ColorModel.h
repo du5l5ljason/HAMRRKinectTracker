@@ -1,6 +1,6 @@
 #pragma once
 #include "Buffer.h"
-#include "StructDefine.h"
+#include "UserTypes.h"
 #include "Kernel.h"
 //#define MEAN_BLACK	0.0762
 //#define VAR_BLACK	0.0027
@@ -10,8 +10,11 @@
 //#define MOD_BETA	0.001
 //#define MOD_WP		0.9
 //#define MOD_WB		0.1
-#define NUMBINS 32
-#define BINSIZE 8
+#define NUMBINSH 32
+#define BINSIZEH 8
+#define NUMBINSV 16
+#define BINSIZEV 16
+#define NUMBINS  512
 class ColorModel
 {
 private:
@@ -22,7 +25,7 @@ private:
 	//For test
 public:
 	double operator[](unsigned int);		//The [] operator indexes into m_model
-	unsigned int findBin(unsigned char);
+	unsigned int findBin( unsigned char, unsigned char ) ;
 	unsigned int getXDim(){return m_nXDim;};
 	unsigned int getYDim(){return m_nYDim;};
 	//empties the model for updating

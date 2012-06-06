@@ -1,44 +1,44 @@
 #pragma once
-#include "StructDefine.h"
+#include "UserTypes.h"
+#include "UserConfigs.h"
 #include <XnCppWrapper.h>
 #include "Buffer.h"
 #include "ImageProc.h"
 #include "cv.h"
 #include "highgui.h"
+
 using namespace xn;
-
-#define _fx 527.96
-#define _fy 530.62
-#define _cx 315.94
-#define _cy 249.10
-
 class KinectCalibration
 {
 
 public:
-	void Calibrate(BaseBuf*, BaseBuf*, DepthGenerator*);
 	POINT3D cvtIPtoGP(POINT3D, DepthGenerator*);		//Convert coordinate :Image point to Global point("L"Frame-based)
+	POINT3D cvtIPtoCamP(POINT3D, DepthGenerator*);		//Convert coordinate: Image point to Camera point 
+	POINT3D cvtCamPtoGP(POINT3D);		//Convert coordinate: Camera point to global point
 	
+	void startCalib(BaseBuf*, BaseBuf*, DepthGenerator*);
+	void testCalib(BaseBuf*, BaseBuf*, DepthGenerator*);
+	void startCalib(POINT3D*, DepthGenerator*);
 	//double **getRot(){return;};
 	//double *getTran(){return;};
 	//void setRot(double **rot){};
 	//void setTran(double **tran){};
+	void computeRot();			//Compute rotation matrix
+	void computeTran();			//Compute tranlation vector
+	double calcDist( POINT3D, POINT3D );
 	void setCalibStage(int n){m_nCalibStage = n;};
+	void saveCalibration();
+	void saveCalibrationDatatoFile();
+	bool loadCalibrationDatafromFile(const char*);
 public:
 	KinectCalibration(void);
 	~KinectCalibration(void);
 
 private:
-	void calcCalib(BaseBuf*, BaseBuf*, DepthGenerator*);
-	void testCalib(BaseBuf*, BaseBuf*, DepthGenerator*);
-	POINT3D cvtIPtoCamP(POINT3D, DepthGenerator*);		//Convert coordinate: Image point to Camera point 
-	POINT3D cvtCamPtoGP(POINT3D);		//Convert coordinate: Camera point to global point
-	void computeRot();			//Compute rotation matrix
-	void computeTran();			//Compute tranlation vector
 	void identifyIP( POINT3D* );
-	double calcDist( POINT3D, POINT3D );
+
 	void swapID( POINT3D*, POINT3D* );
-	void segbyColor(BaseBuf*, BaseBuf*, int nColor);
+	void segbyColor(BaseBuf*, BaseBuf*);
 	void findMarkers(IplImage*, POINT3D*);
 private:
 	POINT3D m_pGP[3];
@@ -46,6 +46,7 @@ private:
 	double m_matRot[3][3];			//Rotation Matrix
 	double m_matTran[3][1];			//Translation Matrix
 	int	m_nCalibStage;				//0 - calculating; 1 - testing
+	bool m_isSaving;
 
 	//for debugging
 	int m_value1;
@@ -56,6 +57,22 @@ private:
 	int m_rangeV3;
 
 public:
+	bool isSaving(){return m_isSaving;};
+	POINT3D getGPAt(int nId){
+		if( nId<3&& nId>=0 )
+		 return m_pGP[nId];
+	}
+	void setGPAt(POINT3D point, int nId){
+		if( nId<3&& nId>=0 )
+		{
+			m_pGP[nId].x = point.x;
+			m_pGP[nId].y = point.y;
+			m_pGP[nId].z = point.z;
+		}
+
+	}
+
+//for debugging
 	int getValue1(){return m_value1;};
 	int getValue2(){return m_value2;};
 	int getValue3(){return m_value3;};

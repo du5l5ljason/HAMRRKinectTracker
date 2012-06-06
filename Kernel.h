@@ -26,16 +26,22 @@ public:
 
 	m_pKlGradArr = new double*[w];
 	for(int i=0;i<w;++i)
-		m_pKlGradArr[i] = new double[h];
+		m_pKlGradArr[i] = new  double[h];
+	calcKernel(w/2, h/2);
 	}
 	~Kernel(void){
-		for(int i=0;i<m_width;++i)
-		{	
-			delete[] m_pKlArr[i];
-			delete[] m_pKlGradArr[i];
+		if(m_pKlArr!=NULL)
+		{
+			for(int i=0;i<m_width;++i)	
+				delete[] m_pKlArr[i];
+			delete[] m_pKlArr;		
 		}
-		delete[] m_pKlArr;
-		delete[] m_pKlGradArr;
+		if(m_pKlGradArr!=NULL)
+		{
+			for(int i=0;i<m_width;++i)	
+				delete[] m_pKlGradArr[i];
+			delete[] m_pKlGradArr;		
+		}
 	};
 };	
 

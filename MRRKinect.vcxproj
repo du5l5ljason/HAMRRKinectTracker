@@ -43,12 +43,12 @@
     <LinkIncremental>true</LinkIncremental>
     <ExecutablePath>$(ExecutablePath)</ExecutablePath>
     <IncludePath>E:\Program Files\OpenNI\Include;E:\Common Softwares\OpenCV-2.3.1\opencv\build\include;E:\Common Softwares\OpenCV-2.3.1\opencv\build\include\opencv;E:\Common Softwares\OpenCV-2.3.1\opencv\build\include\opencv2;$(IncludePath)</IncludePath>
-    <LibraryPath>E:\Common Softwares\OpenCV-2.3.1\opencv\build\x86\vc10\lib;E:\Program Files\OpenNI\Lib;$(LibraryPath)</LibraryPath>
+    <LibraryPath>E:\Program Files\OpenNI\Lib;E:\Common Softwares\OpenCV-2.3.1\opencv\build\x86\vc10\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
     <IncludePath>E:\Program Files\OpenNI\Include;E:\Common Softwares\OpenCV-2.3.1\opencv\build\include;E:\Common Softwares\OpenCV-2.3.1\opencv\build\include\opencv;E:\Common Softwares\OpenCV-2.3.1\opencv\build\include\opencv2;$(IncludePath)</IncludePath>
-    <LibraryPath>E:\Common Softwares\OpenCV-2.3.1\opencv\build\x86\vc10\lib;E:\Program Files\OpenNI\Lib;$(LibraryPath)</LibraryPath>
+    <LibraryPath>E:\Program Files\OpenNI\Lib;E:\Common Softwares\OpenCV-2.3.1\opencv\build\x86\vc10\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -60,7 +60,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>OpenNI.lib;opencv_core231d.lib;opencv_highgui231d.lib;opencv_imgproc231d.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>OpenNI.lib;opencv_core231d.lib;opencv_highgui231d.lib;opencv_imgproc231d.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <Midl>
       <MkTypLibCompatible>false</MkTypLibCompatible>
@@ -87,7 +87,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>OpenNI.lib;opencv_core231.lib;opencv_highgui231.lib;opencv_imgproc231.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>OpenNI.lib;opencv_core231.lib;opencv_highgui231.lib;opencv_imgproc231.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <Midl>
       <MkTypLibCompatible>false</MkTypLibCompatible>
@@ -109,11 +109,17 @@
   <ItemGroup>
     <ClInclude Include="Background.h" />
     <ClInclude Include="Buffer.h" />
+    <ClInclude Include="KinectSensorOpenNI.h" />
+    <ClInclude Include="KinectSkeletonNUI.h" />
+    <ClInclude Include="KSFrameDataSender.h" />
+    <ClInclude Include="ksUtilsFilter.h" />
+    <ClInclude Include="KalmanFilter.h" />
     <ClInclude Include="ImageProc.h" />
     <ClInclude Include="DIBDC.h" />
     <ClInclude Include="DrawWnd.h" />
-    <ClInclude Include="HandTrack.h" />
-    <ClInclude Include="HandTrackMeanShift.h" />
+    <ClInclude Include="KSElbowData.h" />
+    <ClInclude Include="KSHandTrackData.h" />
+    <ClInclude Include="KSHandTrackDataUsingMeanShift.h" />
     <ClInclude Include="ImgWnd.h" />
     <ClInclude Include="Kernel.h" />
     <ClInclude Include="KinectCalibration.h" />
@@ -121,21 +127,35 @@
     <ClInclude Include="KinectSkeleton.h" />
     <ClInclude Include="KinectSkeletonOpenNI.h" />
     <ClInclude Include="ColorModel.h" />
+    <ClInclude Include="KSArchivingData.h" />
+    <ClInclude Include="KSFrameData.h" />
+    <ClInclude Include="KSTorsoData.h" />
+    <ClInclude Include="KSUtilsMAFilter.h" />
     <ClInclude Include="MRRKinect.h" />
     <ClInclude Include="MRRKinectDlg.h" />
+    <ClInclude Include="MulticastClient.h" />
+    <ClInclude Include="MulticastCommon.h" />
+    <ClInclude Include="MulticastServer.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="stdafx.h" />
-    <ClInclude Include="StructDefine.h" />
     <ClInclude Include="targetver.h" />
+    <ClInclude Include="UserConfigs.h" />
+    <ClInclude Include="UserTypes.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Background.cpp" />
     <ClCompile Include="Buffer.cpp" />
+    <ClCompile Include="KinectSensorOpenNI.cpp" />
+    <ClCompile Include="KinectSkeletonNUI.cpp" />
+    <ClCompile Include="KSFrameDataSender.cpp" />
+    <ClCompile Include="KSUtilsFilter.cpp" />
+    <ClCompile Include="KalmanFilter.cpp" />
     <ClCompile Include="ImageProc.cpp" />
     <ClCompile Include="DIBDC.cpp" />
     <ClCompile Include="DrawWnd.cpp" />
-    <ClCompile Include="HandTrack.cpp" />
-    <ClCompile Include="HandTrackMeanShift.cpp" />
+    <ClCompile Include="KSElbowData.cpp" />
+    <ClCompile Include="KSHandTrackData.cpp" />
+    <ClCompile Include="KSHandTrackDataUsingMeanShift.cpp" />
     <ClCompile Include="ImgWnd.cpp" />
     <ClCompile Include="Kernel.cpp" />
     <ClCompile Include="KinectCalibration.cpp" />
@@ -143,8 +163,14 @@
     <ClCompile Include="KinectSkeleton.cpp" />
     <ClCompile Include="KinectSkeletonOpenNI.cpp" />
     <ClCompile Include="ColorModel.cpp" />
+    <ClCompile Include="KSArchivingData.cpp" />
+    <ClCompile Include="KSFrameData.cpp" />
+    <ClCompile Include="KSTorsoData.cpp" />
+    <ClCompile Include="KSUtilsMAFilter.cpp" />
     <ClCompile Include="MRRKinect.cpp" />
     <ClCompile Include="MRRKinectDlg.cpp" />
+    <ClCompile Include="MulticastClient.cpp" />
+    <ClCompile Include="MulticastServer.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>

@@ -1,19 +1,18 @@
 #pragma once
 
 #include "Buffer.h"
-#include "StructDefine.h"
+#include "UserTypes.h"
+#include "UserConfigs.h"
+#include <cv.h>
+#include <highgui.h>
 
-enum CVTMODE{
-	RGB2GRAY,
-	BGR2GRAY,
-	RGB2HSV,
-	BGR2HSV,
-	RGB2BGR,
-};
 
 class ImageProc
 {
 public:
+	void copyIpltoBuffer( IplImage*, BaseBuf* );
+	
+	void loadImageFromFile( const char*, BaseBuf* );
 	void cvtRGB2GRAY(BaseBuf*, BaseBuf*, int);
 	void cvtRGB2GRAY(BaseBuf*, BaseBuf*, Rect, int);
 	void cvtRGB2HSV(BaseBuf*, BaseBuf*, int);

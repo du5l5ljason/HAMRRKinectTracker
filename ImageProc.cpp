@@ -46,6 +46,54 @@ int popQueue(Queue* queue)
 
 }
 
+void ImageProc::copyIpltoBuffer( IplImage* img, BaseBuf* buf )
+{
+	
+	int nChannel = buf->widthBytes() / buf->width();
+
+	switch( nChannel )
+	{
+		case 1: {
+				if(img->widthStep!=buf->widthBytes() || img->height != buf->height() )
+					return;
+				memcpy( buf->getData(), img->imageData, sizeof(BYTE)*img->widthStep*img->height );
+				}
+		case 2: {
+				BYTE* pBuf = buf->getData();
+				BYTE* pImg = (BYTE*)img->imageData;
+				for( int j=0; j< img->height; j++ )
+				{
+					for( int i =0; i< img->width; i++)
+					{
+						pBuf = buf->getData() + j * buf->widthBytes() + i*2;
+						pImg = (BYTE*)( img->imageData + j * img->widthStep + i);
+						int depthinMillimeter = (*(pBuf+1))*256 + (*pBuf);
+						*pImg = (depthinMillimeter > 4096) ? 0 : (255 - depthinMillimeter*255/4096);
+					}
+				}
+
+				}
+		case 3: {
+				if( img->widthStep!=buf->widthBytes() || img->height != buf->height() )
+					return;
+
+				BYTE* pBuf = buf->getData();
+				BYTE* pImg = (BYTE*)img->imageData;
+				for( int j=0; j< img->height; j++ )
+				{
+					for( int i =0; i< img->width; i++)
+					{
+						pBuf = buf->getData() + j * buf->widthBytes() + i*3;
+						pImg = (BYTE*)( img->imageData + j * img->widthStep + i*3);
+						*(pBuf+2) = *pImg;
+						*(pBuf+1) = *(pImg+1);
+						*(pBuf) = *(pImg+2);
+					}
+				}
+				}
+	}
+
+}
 void ImageProc::cvtRGB2GRAY(BaseBuf* rgb, BaseBuf* gray, int mode)
 {
 	if(rgb->height() != gray->height() || rgb->width() != gray->width())return;
@@ -210,10 +258,10 @@ void ImageProc::cvtRGB2HSV(BaseBuf* rgb, BaseBuf* hsv, Rect rect, int mode)
 void ImageProc::rgb2hsv(int blue, int green, int red, float& val, float& sat, float& hue )
 {
 	float max, min, delta, temp;
-	temp = max(blue, green);
-	max = max(temp, red);
-	temp = min(blue, green);
-	min = min(temp, red);
+	temp = (blue > green) ? blue:green;
+	max = ( temp > red ) ? temp:red;
+	temp = ( blue < green ) ? blue:green; 
+	min = ( temp < red ) ? temp:red;
 	val = max;
 	delta = max - min;
 

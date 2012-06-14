@@ -26,10 +26,17 @@ void KSFrameDataSender::sendData()
 
 	m_Server.packBuffer( m_SenderData.getFrameID() );
 	m_Server.packBuffer( m_SenderData.getTimestamp() );
-	m_Server.packBuffer( m_SenderData.getHandX() );
-	m_Server.packBuffer( m_SenderData.getHandY() );
-	m_Server.packBuffer( m_SenderData.getHandZ() );
-	m_Server.packBuffer( m_SenderData.getTorsoZComp() );
+	m_Server.packBuffer( m_SenderData.getLShoulderX() );
+	m_Server.packBuffer( m_SenderData.getLShoulderY() );
+	m_Server.packBuffer( m_SenderData.getLShoulderZ() );
+	m_Server.packBuffer( m_SenderData.getRShoulderX() );
+	m_Server.packBuffer( m_SenderData.getRShoulderY() );
+	m_Server.packBuffer( m_SenderData.getRShoulderZ() );
+	m_Server.packBuffer( m_SenderData.getTorsoX() );
+	m_Server.packBuffer( m_SenderData.getTorsoY() );
+	m_Server.packBuffer( m_SenderData.getTorsoZ() );
+	m_Server.packBuffer( m_SenderData.getTorsoComp() );
+	m_Server.packBuffer( m_SenderData.getShoulderRot() );
 	m_Server.packBuffer( m_SenderData.getElbowOpen() );
 
 	m_Server.send();

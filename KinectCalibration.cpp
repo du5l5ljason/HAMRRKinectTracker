@@ -36,7 +36,7 @@ KinectCalibration::~KinectCalibration(void)
 //Interface
 void KinectCalibration::startCalib(BaseBuf* imgRGB, BaseBuf* imgDepth, DepthGenerator* pDepthGen)
 {
-	const char* fileName = _CALIB_FILE_PATH"calibrationData.txt";
+	const char* fileName = _CALIB_FILE_PATH"CalibrationData.txt";
 	if(loadCalibrationDatafromFile(fileName)){
 		cout << "Already have calibration data, load data from file\n" << endl;
 		return;

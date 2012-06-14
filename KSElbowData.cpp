@@ -31,9 +31,9 @@ void KSElbowData::update( KinectSkeleton* skeleton, DepthGenerator* depthGen)
 	tempPos[0] = gCalib.cvtCamPtoGP( gCalib.getGPAt(0) );
 	tempPos[1] = gCalib.cvtCamPtoGP( gCalib.getGPAt(1) );
 	tempPos[2] = gCalib.cvtCamPtoGP( gCalib.getGPAt(2) );
-	cout << "Point 1 Position: " << "< " << tempPos[0].x << ", " << tempPos[0].y << ", " << tempPos[0].z << " >" << endl;
-	cout << "Point 2 Position: " << "< " << tempPos[1].x << ", " << tempPos[1].y << ", " << tempPos[1].z << " >" << endl;
-	cout << "Point 3 Position: " << "< " << tempPos[2].x << ", " << tempPos[2].y << ", " << tempPos[2].z << " >" << endl;
+	//cout << "Point 1 Position: " << "< " << tempPos[0].x << ", " << tempPos[0].y << ", " << tempPos[0].z << " >" << endl;
+	//cout << "Point 2 Position: " << "< " << tempPos[1].x << ", " << tempPos[1].y << ", " << tempPos[1].z << " >" << endl;
+	//cout << "Point 3 Position: " << "< " << tempPos[2].x << ", " << tempPos[2].y << ", " << tempPos[2].z << " >" << endl;
 
 	float dist01, dist12, dist02;
 	dist01 = gCalib.calcDist( tempPos[0], tempPos[1] );
@@ -43,8 +43,8 @@ void KSElbowData::update( KinectSkeleton* skeleton, DepthGenerator* depthGen)
 	elbowExtension = acos ((dist01*dist01 - dist02*dist02 - dist12*dist12)/(2* dist02 * dist12 ))*180/PI  ;
 	//elbowExtension = 0.5f;
 	//do scale transform based on the largest and smallest joint engles.
-	cout << "The elbow extension is " << elbowExtension << endl;
-	cout << "----------------------------------------" << endl;
+	//cout << "The elbow extension is " << elbowExtension << endl;
+	//cout << "----------------------------------------" << endl;
 }
 
 void KSElbowData::depthFilter( POINT3D* point1, POINT3D* point2, POINT3D* point3 )

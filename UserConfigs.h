@@ -4,7 +4,7 @@
 using namespace xn;
 #define MODEL_W 24		//hx	Width of the model
 #define MODEL_H 24		//hy	Height of the model
-#define _MODEL_FILE_PATH "D:\\Model.bmp"
+#define FILE_PATH "C:\\Model.bmp"
 
 
 #define _ELBOWTHRESH 1000
@@ -15,7 +15,7 @@ using namespace xn;
 #define _DEP_THRESH 10		//For background removal
 
 #define _MAXARCHIVENUM 10000
-#define _DATA_ARCHIVEFILE_PATH "D:\\"
+#define _DATA_ARCHIVEFILE_PATH "C:\\Users\\Home System\\Documents\\KinectArchive\\"
 
 #define ROI_SIZE_W 100
 #define ROI_SIZE_H 100
@@ -30,13 +30,13 @@ using namespace xn;
 #define _fy 530.62
 #define _cx 315.94
 #define _cy 249.10
-#define _CALIB_FILE_PATH "D:\\"
+#define _CALIB_FILE_PATH "C:\\Users\\Home System\\Documents\\KinectArchive\\"
 #define _NFRAMES 100
 
 //Kinect Skeleton
 #define MAXJOINT 24
 
-#define _BGPATH "D:\\My Documents\\MRRKinectTracking Images\\BG\\"
+#define _BGPATH "C:\\Users\\Home System\\Documents\\KinectArchive\\"
 
 enum CVTMODE{
 	RGB2GRAY,
@@ -58,4 +58,4 @@ enum SYMSTATUS{
 	_SS_TRACK,
 };
 
-#define SAMPLE_XML_PATH "E:\\Program Files\\OpenNI\\Data\\SamplesConfig.xml"
+#define SAMPLE_XML_PATH "C:\\Program Files (x86)\\OpenNI\\Data\\SamplesConfig.xml"

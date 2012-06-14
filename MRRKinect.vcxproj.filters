@@ -112,9 +112,6 @@
     <ClInclude Include="ColorModel.h">
       <Filter>Header Files\Structure</Filter>
     </ClInclude>
-    <ClInclude Include="Kernel.h">
-      <Filter>Header Files\Structure</Filter>
-    </ClInclude>
     <ClInclude Include="KinectCalibration.h">
       <Filter>Header Files\Device</Filter>
     </ClInclude>
@@ -156,6 +153,9 @@
     </ClInclude>
     <ClInclude Include="KSFrameDataSender.h">
       <Filter>Header Files\Data</Filter>
+    </ClInclude>
+    <ClInclude Include="Kernel.h">
+      <Filter>Header Files\Utils</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

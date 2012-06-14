@@ -24,6 +24,13 @@ typedef struct Rect{
 	int height;
 }Rect;
 
+typedef struct Plane3D{
+	float A;
+	float B;
+	float C;
+	float D;
+}Plane3D; // plane is represented as Ax + By + Cz + D = 0;
+
 typedef struct QNode
 {
 	int data;

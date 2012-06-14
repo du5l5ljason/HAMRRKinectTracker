@@ -2,7 +2,7 @@
 
 #include "KinectSkeleton.h"
 #include <XnCppWrapper.h>
-#include "cv.h"
+//#include "cv.h"
 #include "UserConfigs.h"
 
 using namespace xn;

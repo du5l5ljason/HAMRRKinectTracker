@@ -25,7 +25,7 @@ bool KSHandTrackDataUsingMeanShift::init(BaseBuf* imgSrc, Rect &ROI)
 	//Kernel* kernelH = new Kernel(MODEL_W-10, MODEL_H);
 	/////////////////////////////////////////////////////////////////
 	//Read Model Image from local files
-	//const char* fileszName = _FILE_PATH;
+	//const char* fileszName = FILE_PATH;
 	//cout << "File name is" << fileszName << endl;
 	//m_dib->OpenImage(fileszName);	// Create an model Image.
 	//if(!=xDim || m_dib->Height()!=yDim) 

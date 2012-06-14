@@ -39,13 +39,6 @@ private:
 	CImgWnd m_wndRGB;
 	CImgWnd m_wndDepth;
 	CImgWnd* m_wndFull; 
-
-	CSliderCtrl* m_slider1;
-	CSliderCtrl* m_slider2;
-	CSliderCtrl* m_slider3;
-	CSliderCtrl* m_slider4;
-	CSliderCtrl* m_slider5;
-	CSliderCtrl* m_slider6;
 	
 	KinectSkeletonOpenNI*	m_pSkeleton;
 	Background*				m_pBG;
@@ -97,10 +90,9 @@ public:
 		if(m_pModel!=NULL)delete m_pModel;
 		if(m_pCalib!=NULL)delete m_pCalib;
 		if(m_pTorsoData!=NULL)delete m_pTorsoData;
+		if(m_pElbowData!=NULL)delete m_pElbowData;
 		if(m_pFrameData!=NULL)delete m_pFrameData;
 		if(m_pArchivingData!=NULL)delete m_pArchivingData;
-
-		delete m_slider1, m_slider2, m_slider3,  m_slider4,  m_slider5,  m_slider6;
 	}
 // Dialog Data
 	enum { IDD = IDD_MRRKINECT_DIALOG };
@@ -120,8 +112,6 @@ protected:
 	DECLARE_MESSAGE_MAP()
 public:
 	afx_msg void OnBnClickedCancel();
-	afx_msg void OnBnClickedButtonGreen();
-	afx_msg void OnBnClickedButtonBlack();
 	afx_msg void OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
 	afx_msg void OnMouseMove(UINT nFlags, CPoint point);
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
@@ -137,4 +127,7 @@ public:
 	afx_msg void OnBnClickedButtonTestcalib();
 	afx_msg void OnBnClickedButtonSavecalib2();
 	afx_msg void OnBnClickedButtonResetcalib();
+	afx_msg void OnBnClickedButtonRecord();
+	afx_msg void OnBnClickedButtonRecordEnd();
+
 };

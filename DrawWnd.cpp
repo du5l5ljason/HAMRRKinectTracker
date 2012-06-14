@@ -27,27 +27,27 @@ void CDrawWnd::showSkeleton(POINT3D* jointPos)
 		{XN_SKEL_RIGHT_ELBOW, XN_SKEL_RIGHT_WRIST},
 		{XN_SKEL_LEFT_SHOULDER, XN_SKEL_TORSO},
 		{XN_SKEL_RIGHT_SHOULDER, XN_SKEL_TORSO},
-		{XN_SKEL_TORSO, XN_SKEL_LEFT_HIP},
+		//{XN_SKEL_TORSO, XN_SKEL_LEFT_HIP},
 		//{XN_SKEL_LEFT_HIP, XN_SKEL_LEFT_KNEE},
 		//{XN_SKEL_LEFT_KNEE, XN_SKEL_LEFT_FOOT},
-		{XN_SKEL_TORSO, XN_SKEL_RIGHT_HIP},
+		//{XN_SKEL_TORSO, XN_SKEL_RIGHT_HIP},
 		//{XN_SKEL_RIGHT_HIP, XN_SKEL_RIGHT_KNEE},
 		//{XN_SKEL_RIGHT_KNEE, XN_SKEL_RIGHT_FOOT},
-		{XN_SKEL_LEFT_HIP, XN_SKEL_RIGHT_HIP},
+		//{XN_SKEL_LEFT_HIP, XN_SKEL_RIGHT_HIP},
 		{XN_SKEL_LEFT_WRIST, XN_SKEL_LEFT_HAND},
 		{XN_SKEL_RIGHT_WRIST, XN_SKEL_RIGHT_HAND}
 	};
-	for( int i = 0 ;i < 14 ;i ++ ) {
+	for( int i = 0 ;i < 11 ;i ++ ) {
 		int id1 = jointPair[i][0];
 		int id2 = jointPair[i][1];
 
 		//want to see more clear, the elbow angle  may 7th
-		if( jointPair[i][1] == XN_SKEL_RIGHT_WRIST )
-			showLine( jointPos[id1].x, jointPos[id1].y , jointPos[id2].x, jointPos[id2].y ,redcolor); 
-		else if( jointPair[i][1] == XN_SKEL_RIGHT_ELBOW )
-			showLine(jointPos[id1].x, jointPos[id1].y, jointPos[id2].x, jointPos[id2].y, redcolor);
-		else
-			showLine(jointPos[id1].x, jointPos[id1].y, jointPos[id2].x, jointPos[id2].y, bluecolor);
+		//if( jointPair[i][1] == XN_SKEL_RIGHT_WRIST )
+		//	showLine( jointPos[id1].x, jointPos[id1].y , jointPos[id2].x, jointPos[id2].y ,redcolor); 
+		//else if( jointPair[i][1] == XN_SKEL_RIGHT_ELBOW )
+		//	showLine(jointPos[id1].x, jointPos[id1].y, jointPos[id2].x, jointPos[id2].y, redcolor);
+		//else
+		showLine(jointPos[id1].x, jointPos[id1].y, jointPos[id2].x, jointPos[id2].y, bluecolor);
 	}
 	
 	int jointKey[3] = {

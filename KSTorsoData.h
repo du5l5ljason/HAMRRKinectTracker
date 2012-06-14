@@ -8,20 +8,37 @@
 using namespace xn;
 class KSTorsoData
 {
-	POINT3D restPos;
+	POINT3D restLShoulderPos;
+	POINT3D restRShoulderPos;
+	POINT3D restTorsoPos;
 	POINT3D currentPos;
+	Plane3D restTorsoPlane;
 	float torsoComps;
+	float shoulderRot;
 	bool m_bIsReady;
 public:
 
-	POINT3D getRestPos(){return restPos;};
-	void setRestPos( POINT3D pos ) {
-		restPos.x = pos.x;
-		restPos.y = pos.y;
-		restPos.z = pos.z;
+	POINT3D getRestLShoulderPos(){return restLShoulderPos;};
+	POINT3D getRestRShoulderPos(){return restRShoulderPos;};
+	POINT3D getRestTorsoPos(){return restTorsoPos;};
+	void setRestLShoulderPos( POINT3D pos ) {
+		restLShoulderPos.x = pos.x;
+		restLShoulderPos.y = pos.y;
+		restLShoulderPos.z = pos.z;
 	};
-	float getTorsoComps(){return torsoComps;};
+	void setRestRShoulderPos( POINT3D pos ){
+		restRShoulderPos.x = pos.x;
+		restRShoulderPos.y = pos.y;
+		restRShoulderPos.z = pos.z;
+	};
+	void setRestTorsoPos( POINT3D pos ){
+		restTorsoPos.x = pos.x;
+		restTorsoPos.y = pos.y;
+		restTorsoPos.z = pos.z;
+	};
 
+	float getTorsoComps(){return torsoComps;};
+	float getShoulderRot(){return shoulderRot;};
 	POINT3D getCurrentPos(){return currentPos;};
 	bool isReady(){return m_bIsReady;};
 	void setReady(bool flag){m_bIsReady = flag;};
@@ -31,19 +48,33 @@ public:
 		currentPos.y = point.y;
 		currentPos.z = point.z;
 	};
-	void setTorsoComps(float f){torsoComps = f;};
-
+	void setRestPlane(Plane3D plane){ restTorsoPlane = plane;};
+	void setTorsoComps(float tc){torsoComps = tc;};
+	void setShoulderRot(float sr){shoulderRot = sr;};
 	void update( BaseBuf*, KinectSkeleton*, KinectCalibration* , DepthGenerator* );
 public:
-	KSTorsoData(void):torsoComps(0.0f),m_bIsReady(false){
-		restPos.x = 0.0f;
-		restPos.y = 0.0f;
-		restPos.z = 0.0f;
+	KSTorsoData(void):torsoComps(0.0f),shoulderRot(0.0f), m_bIsReady(false){
+		restLShoulderPos.x = 0.0f;
+		restLShoulderPos.y = 0.0f;
+		restLShoulderPos.z = 0.0f;
+		restRShoulderPos.x = 0.0f;
+		restRShoulderPos.y = 0.0f;
+		restRShoulderPos.z = 0.0f;
+		restTorsoPos.x = 0.0f;
+		restTorsoPos.y = 0.0f;
+		restTorsoPos.z = 0.0f;
 		currentPos.x = 0.0f;
 		currentPos.y = 0.0f;
 		currentPos.z = 0.0f;
+		restTorsoPlane.A = 0.0f;
+		restTorsoPlane.B = 0.0f;
+		restTorsoPlane.C = 0.0f;
+		restTorsoPlane.D = 0.0f;
 	};
 	~KSTorsoData(void){
 	};
+
+	Plane3D calcPlaneFrom3Points(POINT3D p1, POINT3D p2, POINT3D p3);
+
 };
 

@@ -46,7 +46,7 @@ void Background::removeBG(BaseBuf* rgb, BaseBuf* depth, BaseBuf* rgbBG, BaseBuf*
 	int nDepthBG = 0;
 	dst->zeroBuffer();
 
-	float fbkDepthThreshGrayValue = ( bkDepthThresh>MAX_DEPTH) ? 0 : (255-(int)bkDepthThresh*255/MAX_DEPTH - 5);
+	float fbkDepthThreshGrayValue = ( bkDepthThresh>MAX_DEPTH) ? 0 : (255-(int)bkDepthThresh*255/MAX_DEPTH);
 	for(int j=0;j< rect.height;j++)
 	{
 		pRgbSrc = rgb->getData() + (j+offsety)*rgb->widthBytes() + offsetx*3;

@@ -10,8 +10,8 @@
 class ImageProc
 {
 public:
-	void copyIpltoBuffer( IplImage*, BaseBuf* );
-	
+	void cvtIplImagetoBuffer( IplImage*, BaseBuf* );
+	void cvtBuffertoIplImage( BaseBuf*, IplImage* );
 	void loadImageFromFile( const char*, BaseBuf* );
 	void cvtRGB2GRAY(BaseBuf*, BaseBuf*, int);
 	void cvtRGB2GRAY(BaseBuf*, BaseBuf*, Rect, int);

@@ -15,7 +15,7 @@ void checkOpenNIError( XnStatus eResult, char* sStatus)
 
 void KinectOpenNI::init(){
 	//Initialize context
-	checkOpenNIError( m_Context.InitFromXmlFile(SAMPLE_XML_PATH), "initialize context");
+	checkOpenNIError( m_Context.InitFromXmlFile(_SAMPLE_XML_PATH), "initialize context");
 
 	//Create generator
 	checkOpenNIError( m_Context.FindExistingNode( XN_NODE_TYPE_DEPTH, m_depthGen ), "Create depth generator" );

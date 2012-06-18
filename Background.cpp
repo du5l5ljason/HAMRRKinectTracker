@@ -91,8 +91,9 @@ bool Background::loadBGfromFile( const char* rgbFileName, const char* depthFileN
 	IplImage* rgb = cvLoadImage( _BGPATH"rgbBG.bmp", 1 );
 	IplImage* depth = cvLoadImage( _BGPATH"depthBG.bmp", 1 );
 	if( rgb == NULL || depth == NULL ) return false;
-	m_pImgProc.copyIpltoBuffer( rgb, m_imgRgbBG );
-	m_pImgProc.copyIpltoBuffer( depth, m_imgDepthBG );
+	m_pImgProc.cvtIplImagetoBuffer( rgb, m_imgRgbBG );
+	m_pImgProc.cvtIplImagetoBuffer( depth, m_imgDepthBG );
+
 	
 	cvReleaseImage( &rgb );
 	cvReleaseImage( &depth );

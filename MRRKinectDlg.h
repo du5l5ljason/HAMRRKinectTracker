@@ -13,6 +13,7 @@
 #include "KinectCalibration.h"
 #include "KSUtilsFilter.h"
 #include "KSUtilsMAFilter.h"
+#include "KSUtilsVideoRecorder.h"
 #include "Background.h"
 #include "ImageProc.h"
 #include "UserTypes.h"
@@ -45,6 +46,7 @@ private:
 	KinectOpenNI			kinect;
 	KinectCalibration*		m_pCalib;
 	KSUtilsFilter*			m_pFilter;
+	KSUtilsVideoRecorder*   m_pVideoRecorder;
 	ImageProc*				m_pImgProc;
 	KSHandTrackDataUsingMeanShift* m_pHandTrackData;
 	KSTorsoData*			m_pTorsoData;
@@ -64,6 +66,7 @@ public:
 	CImgWnd*				getFullWnd(){return m_wndFull;}
 	Background*				getBG(){return m_pBG;};
 	KSUtilsFilter*			getFilter(){return m_pFilter;};
+	KSUtilsVideoRecorder*   getRecorder(){return m_pVideoRecorder;};
 	KinectSkeletonOpenNI*	getSkeleton(){return m_pSkeleton;}
 	KSHandTrackDataUsingMeanShift* getHandTrackData(){return m_pHandTrackData;};
 	KinectCalibration*		getCalibration(){return m_pCalib;};
@@ -86,6 +89,7 @@ public:
 		if(m_pHandTrackData!=NULL)delete m_pHandTrackData;
 		if(m_pBG!=NULL)delete m_pBG;
 		if(m_pFilter!=NULL)delete m_pFilter;
+		if(m_pVideoRecorder!=NULL)delete m_pVideoRecorder;
 		if(m_pImgProc!=NULL)delete m_pImgProc;
 		if(m_pModel!=NULL)delete m_pModel;
 		if(m_pCalib!=NULL)delete m_pCalib;
@@ -119,13 +123,10 @@ public:
 	afx_msg void OnBnClickedButtonTrack();
 	afx_msg void OnBnClickedButtonReset();
 	afx_msg void OnBnClickedButtonSetmodel();
-	afx_msg void OnBnClickedButtonCalib2();
 	afx_msg void OnBnClickedButtonArchive();
 	afx_msg void OnBnClickedButtonEndarchive();
 	afx_msg void OnBnClickedButtonSavecalib();
-	afx_msg void OnBnClickedButton3();
 	afx_msg void OnBnClickedButtonTestcalib();
-	afx_msg void OnBnClickedButtonSavecalib2();
 	afx_msg void OnBnClickedButtonResetcalib();
 	afx_msg void OnBnClickedButtonRecord();
 	afx_msg void OnBnClickedButtonRecordEnd();

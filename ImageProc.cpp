@@ -46,11 +46,12 @@ int popQueue(Queue* queue)
 
 }
 
-void ImageProc::copyIpltoBuffer( IplImage* img, BaseBuf* buf )
+void ImageProc::cvtIplImagetoBuffer( IplImage* img, BaseBuf* buf )
 {
 	
 	int nChannel = buf->widthBytes() / buf->width();
-
+	BYTE* pBuf = NULL;
+	BYTE* pImg = NULL;
 	switch( nChannel )
 	{
 		case 1: {
@@ -59,16 +60,18 @@ void ImageProc::copyIpltoBuffer( IplImage* img, BaseBuf* buf )
 				memcpy( buf->getData(), img->imageData, sizeof(BYTE)*img->widthStep*img->height );
 				}
 		case 2: {
-				BYTE* pBuf = buf->getData();
-				BYTE* pImg = (BYTE*)img->imageData;
+				pBuf = buf->getData();
+				pImg = (BYTE*)img->imageData;
 				for( int j=0; j< img->height; j++ )
 				{
 					for( int i =0; i< img->width; i++)
 					{
 						pBuf = buf->getData() + j * buf->widthBytes() + i*2;
 						pImg = (BYTE*)( img->imageData + j * img->widthStep + i);
-						int depthinMillimeter = (*(pBuf+1))*256 + (*pBuf);
-						*pImg = (depthinMillimeter > 4096) ? 0 : (255 - depthinMillimeter*255/4096);
+						int depthinMillimeter = 4096 * ( 255 - (*pImg) ) / 255;
+						*(pBuf+1) = depthinMillimeter%256;
+						*(pBuf) = ( depthinMillimeter - *(pBuf+1) ) / 256;
+
 					}
 				}
 
@@ -94,6 +97,51 @@ void ImageProc::copyIpltoBuffer( IplImage* img, BaseBuf* buf )
 	}
 
 }
+
+void ImageProc::cvtBuffertoIplImage( BaseBuf* buf, IplImage* img )
+{
+	if( img->widthStep != buf->widthBytes() || img->height != buf->height() )
+		//throw error
+		return;
+
+	int nChannel = buf->widthBytes() / buf->width();
+
+	BYTE* pBuf = NULL;
+	BYTE* pImg = NULL;
+	switch( nChannel ){
+		case 1:
+			memcpy(img->imageData, buf->getData(), sizeof(BYTE)*buf->widthBytes()*buf->height() );break;
+		case 2:
+			pBuf = buf->getData();
+			pImg = (BYTE*)img->imageData;
+			for( int j=0; j< img->height; j++ )
+			{
+				for( int i =0; i< img->width; i++)
+				{
+					pBuf = buf->getData() + j * buf->widthBytes() + i*2;
+					pImg = (BYTE*)( img->imageData + j * img->widthStep + i);
+					int depthinMillimeter = (*(pBuf+1))*256 + (*pBuf);
+					*pImg = (depthinMillimeter > 4096) ? 0 : (255 - depthinMillimeter*255/4096);
+				}
+			}break;
+		case 3:
+			pBuf = buf->getData();
+			pImg = (BYTE*)img->imageData;
+			for( int j=0; j< img->height; j++ )
+			{
+				for( int i =0; i< img->width; i++)
+				{
+					pBuf = buf->getData() + j * buf->widthBytes() + i*3;
+					pImg = (BYTE*)( img->imageData + j * img->widthStep + i*3);
+					*(pImg+2) = *pBuf;
+					*(pImg+1) = *(pBuf+1);
+					*(pImg) = *(pBuf+2);
+				}
+			}break;
+		default: break;
+	}
+}
+
 void ImageProc::cvtRGB2GRAY(BaseBuf* rgb, BaseBuf* gray, int mode)
 {
 	if(rgb->height() != gray->height() || rgb->width() != gray->width())return;

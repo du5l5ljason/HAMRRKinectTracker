@@ -306,7 +306,8 @@ DWORD WINAPI ShowStreams(LPVOID lpParam) {
 	//modRect.height = MODEL_H;
 	//fullWnd->showRect( modRect );
 	WARNING END*/
-	
+	//if( dlg->getRecorder()->isRun() )
+	//		dlg->getRecorder()->record( kinect->getRGBImg() );
 
 	if(dlg->getSkeleton()->update())
 	{
@@ -316,6 +317,9 @@ DWORD WINAPI ShowStreams(LPVOID lpParam) {
 	}
 	//fullWnd->showHandJoint(dlg->getHandTrackData()->getHandPos());
 	fullWnd->Invalidate();
+
+
+
 
 	return 0;
 }
@@ -490,7 +494,7 @@ void CMRRKinectDlg::InitKinect() {
 	m_pTorsoData = new KSTorsoData;
 	m_pElbowData = new KSElbowData;
 	m_pArchivingData = new KSArchivingData;
-
+	m_pVideoRecorder = new KSUtilsVideoRecorder;
 	m_pFilter = new KSUtilsMAFilter(2);
 	kinect.open();
 
@@ -672,13 +676,16 @@ void CMRRKinectDlg::OnBnClickedButtonResetcalib()
 void CMRRKinectDlg::OnBnClickedButtonRecord()
 {
 	// TODO: Add your control notification handler code here
-
+	m_pVideoRecorder->setIsRun( true );
 }
 
 
 void CMRRKinectDlg::OnBnClickedButtonRecordEnd()
 {
 	// TODO: Add your control notification handler code here
+	m_pVideoRecorder->close();
+	m_pVideoRecorder->setIsRun( false );
+
 }
 
 

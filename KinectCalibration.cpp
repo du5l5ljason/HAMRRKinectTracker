@@ -149,20 +149,20 @@ POINT3D KinectCalibration::cvtIPtoCamP( const POINT3D pImgPt, DepthGenerator* pD
 	int idx;
 	POINT3D pTempPt, pCamPt;
 	const XnDepthPixel* pDepthMap = pDepthGen->GetDepthMap() ;	//What is the problem of this sentence
-	int nheight = 480;
-	int nwidth = 640;
+	int nheight = _IMAGE_HEIGHT;
+	int nwidth = _IMAGE_WIDTH;
 	int nBound = 10;
 	pTempPt.x = pImgPt.x; 
 	pTempPt.y = pImgPt.y;
 
 	if(pTempPt.x < nBound)
 		pTempPt.x = nBound;
-	if(pTempPt.x > 640 - nBound)
-		pTempPt.x = 640 - nBound;
+	if(pTempPt.x > nwidth - nBound)
+		pTempPt.x = nwidth - nBound;
 	if(pTempPt.y < nBound )
 		pTempPt.y = nBound;
-	if(pTempPt.y > (480 - nBound))
-		pTempPt.y = 480 - nBound;
+	if(pTempPt.y > (nheight - nBound))
+		pTempPt.y = nheight - nBound;
 
 	idx = pTempPt.y * nwidth + pTempPt.x;
 
@@ -408,8 +408,8 @@ void KinectCalibration::segbyColor( BaseBuf* imgSrc, BaseBuf* imgDst )
 	Rect rect;
 	rect.x = 0;
 	rect.y = 0; 
-	rect.width = 640;
-	rect.height = 480;
+	rect.width = _IMAGE_WIDTH;
+	rect.height = _IMAGE_HEIGHT;
 
 	m_pImgProc->medianfilter(imgDst, rect, 3);
 }

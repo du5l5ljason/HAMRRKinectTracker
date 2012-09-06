@@ -55,6 +55,7 @@ private:
 	KSArchivingData*		m_pArchivingData;
 	//For test
 	ColorModel*				m_pModel;
+	int						m_nDisplayType;
 	void InitImgWnd();
 	void InitKinect();
 
@@ -77,9 +78,8 @@ public:
 	KSArchivingData*		getArchivingData(){return m_pArchivingData;};
 	//For test
 	ColorModel*				getModel(){return m_pModel;};
-
+	int						DisplayType(){return m_nDisplayType;};
 //Methods
-	
 // Construction
 public:
 	CMRRKinectDlg(CWnd* pParent = NULL);	// standard constructor
@@ -132,4 +132,9 @@ public:
 	afx_msg void OnBnClickedButtonRecordEnd();
 	afx_msg void OnBnClickedButtonNewcalib();
 	afx_msg void OnBnClickedButtonLoadcalib();
+
+
+	afx_msg void OnRadio1();
+	afx_msg void OnRadio2();
+	afx_msg void OnRadio3();
 };

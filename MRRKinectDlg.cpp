@@ -140,6 +140,7 @@ CMRRKinectDlg::CMRRKinectDlg(CWnd* pParent /*=NULL*/)
 	m_pModel = new ColorModel;
 	m_pCalib = new KinectCalibration;
 
+	m_nDisplayType = 0;
 }
 
 void CMRRKinectDlg::DoDataExchange(CDataExchange* pDX)
@@ -167,6 +168,9 @@ BEGIN_MESSAGE_MAP(CMRRKinectDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_BUTTON_RECORDEND, &CMRRKinectDlg::OnBnClickedButtonRecordEnd)
 	ON_BN_CLICKED(IDC_BUTTON_NEWCALIB, &CMRRKinectDlg::OnBnClickedButtonNewcalib)
 	ON_BN_CLICKED(IDC_BUTTON_LOADCALIB, &CMRRKinectDlg::OnBnClickedButtonLoadcalib)
+	ON_COMMAND(IDC_RADIO1, &CMRRKinectDlg::OnRadio1)
+	ON_COMMAND(IDC_RADIO2, &CMRRKinectDlg::OnRadio2)
+	ON_COMMAND(IDC_RADIO3, &CMRRKinectDlg::OnRadio3)
 END_MESSAGE_MAP()
 
 
@@ -257,23 +261,8 @@ HCURSOR CMRRKinectDlg::OnQueryDragIcon()
 }
 
 void CMRRKinectDlg::InitImgWnd() {
-	CRect rect;
-	GetDlgItem( IDC_RGBFRAME )->GetWindowRect( rect );
-	ScreenToClient( rect );
+	CRect rect;	
 	int nBorder = 8;
-	rect.left += nBorder;
-	rect.right -= nBorder-1;
-	rect.top += nBorder;
-	rect.bottom -= nBorder-1;
-	m_wndRGB.Create( WS_VISIBLE , rect, this, IDR_RGBFRAME );
-
-	GetDlgItem( IDC_DEPTHFRAME )->GetWindowRect( rect );
-	ScreenToClient( rect );
-	rect.left += nBorder;
-	rect.right -= nBorder-1;
-	rect.top += nBorder;
-	rect.bottom -= nBorder-1;
-	m_wndDepth.Create( WS_VISIBLE , rect, this, IDR_DEPTHFRAME );
 
 	GetDlgItem( IDC_FULLFRAME )->GetWindowRect( rect );
 	ScreenToClient( rect );
@@ -284,27 +273,45 @@ void CMRRKinectDlg::InitImgWnd() {
 	m_wndFull = new CDrawWnd();
 	m_wndFull->Create( WS_VISIBLE , rect, this, IDR_FULLFRAME );
 
+	
+
 }
+
 
 DWORD WINAPI ShowStreams(LPVOID lpParam) {
 	CMRRKinectDlg* dlg = (CMRRKinectDlg*)(lpParam);
 	KinectSensor* kinect = dlg->getKinect();
 
-	CImgWnd* rgbWnd = dlg->getRGBWnd();
+
 	int w = kinect->getRGBImg()->width();
 	int h = kinect->getRGBImg()->height();
 	int wb = kinect->getRGBImg()->widthBytes();
-	rgbWnd->ShowDownSampleImg24(w, h, wb, kinect->getRGBImg()->getData());
-
-	CImgWnd* depthWnd = dlg->getDepthWnd();
-	wb = kinect->getDepthImg()->widthBytes();
-	depthWnd->ShowDownSampleImg16(w, h, wb, kinect->getDepthImg()->getData());
 
 	CImgWnd* fullWnd = dlg->getFullWnd();
-	wb = kinect->getRGBImg()->widthBytes();
+
+	switch( dlg->DisplayType() ){
+			case 1: wb = kinect->getDepthImg()->widthBytes();
+					fullWnd->ShowImg16( w, h, wb, kinect->getDepthImg()->getData());//Display depthbreak;
+				break;
+			case 2: wb = kinect->getRGBImg()->widthBytes();
+					fullWnd->ShowImg(w, h, wb, kinect->getRGBImg()->getData());//Display imagebreak;
+					fullWnd->Invalidate();
+					break;
+			case 0: wb = kinect->getRGBImg()->widthBytes();
+					fullWnd->ShowImg(w,h,wb,kinect->getRGBImg()->getData());
+					if(dlg->getSkeleton()->update())
+					{
+						//if(dlg->getHandTrackData()->isReady())
+							//dlg->getSkeleton()->setJointPosAt(XN_SKEL_RIGHT_HAND, dlg->getHandTrackData()->getHandPos(), 1.0f);			//set hand position to the skeleton.
+						fullWnd->showSkeleton(dlg->getSkeleton()->getJointPos());
+					}
+					//fullWnd->showHandJoint(dlg->getHandTrackData()->getHandPos());
+					fullWnd->Invalidate();
+				break;
+	}
 
 	//Test code: Edited by Tingfang 10/28
-	fullWnd->ShowImg(w,h,wb,kinect->getRGBImg()->getData());
+	//fullWnd->ShowImg(w,h,wb,kinect->getRGBImg()->getData());
 	//fullWnd->ShowImg(w,h,wb,dlg->getBG()->getRgbBG()->getData());
 
 	//fullWnd->ShowImg(w, h, wb, dlg->getHandTrackData()->getImg()->getData());
@@ -319,18 +326,6 @@ DWORD WINAPI ShowStreams(LPVOID lpParam) {
 	WARNING END*/
 	//if( dlg->getRecorder()->isRun() )
 	//		dlg->getRecorder()->record( kinect->getRGBImg() );
-
-	if(dlg->getSkeleton()->update())
-	{
-		//if(dlg->getHandTrackData()->isReady())
-			//dlg->getSkeleton()->setJointPosAt(XN_SKEL_RIGHT_HAND, dlg->getHandTrackData()->getHandPos(), 1.0f);			//set hand position to the skeleton.
-		fullWnd->showSkeleton(dlg->getSkeleton()->getJointPos());
-	}
-	//fullWnd->showHandJoint(dlg->getHandTrackData()->getHandPos());
-	fullWnd->Invalidate();
-
-
-
 
 	return 0;
 }
@@ -772,4 +767,25 @@ void CMRRKinectDlg::OnBnClickedButtonLoadcalib()
 {
 	// TODO: Add your control notification handler code here
 	gCalibStatus = 1;
+}
+
+
+void CMRRKinectDlg::OnRadio1()
+{
+	// TODO: Add your command handler code here
+	m_nDisplayType = 1;
+}
+
+
+void CMRRKinectDlg::OnRadio2()
+{
+	// TODO: Add your command handler code here
+	m_nDisplayType = 2;
+}
+
+
+void CMRRKinectDlg::OnRadio3()
+{
+	// TODO: Add your command handler code here
+	m_nDisplayType = 0;
 }

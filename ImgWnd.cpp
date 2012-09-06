@@ -76,6 +76,18 @@ void CImgWnd::ShowImg(int width, int height, BYTE** pData) {
 	Invalidate();
 }
 
+void CImgWnd::ShowImg16(int width, int height, int widthstep, BYTE* pData) {
+	m_dibShow.CreateDIB(width, -height, 24);
+	for (int i = 0 ; i < height ; i ++ )
+		for (int j = 0 ; j < width ; j++ ) {
+			BYTE r = pData[i*widthstep+j*2];
+			BYTE g = pData[i*widthstep+j*2+1];
+			int x = int(g)*256+r;
+			BYTE y = ( x>MAX_DEPTH) ? 0 : 255-x*255/MAX_DEPTH;
+			m_dibShow.SetAt(j,i,RGB(y,y,y));
+		}
+	Invalidate();	
+}
 void CImgWnd::ShowDownSampleImg24(int width, int height, int widthstep, BYTE* pData) {
 	m_dibShow.CreateDIB(width/2, -height/2, 24);
 	for (int i = 0 ; i < height ; i +=2 )

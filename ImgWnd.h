@@ -18,7 +18,7 @@ public:
 	void ShowImg(CDIBDC* pDIB);
 	void ShowImg(int width, int height, int widthstep, BYTE* pData);
 	void ShowImg(int width, int height, BYTE** pData);
-
+	void ShowImg16(int width, int height, int widthstep, BYTE* pData);
 	void ShowDownSampleImg24(int width, int height, int widthstep, BYTE* pData);
 	void ShowDownSampleImg16(int width, int height, int widthstep, BYTE* pData);
 	void ShowDownSampleImg8(int width, int height, int widthstep, BYTE* pData);

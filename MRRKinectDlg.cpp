@@ -27,7 +27,8 @@ HANDLE g_hKinectThread;
 int gnPointMode=1;
 int gnSystemStatus = _SS_REST;
 int gCalibStatus = 0;
-POINT3D pMarkerSet[3];
+POINT3D gpMarkerSet[3];
+int gMarkerCount = 0;
 #if defined(_MSC_VER) || defined(_MSC_EXTENSIONS)
   #define DELTA_EPOCH_IN_MICROSECS  11644473600000000Ui64
 #else
@@ -40,8 +41,16 @@ struct timezone
   int  tz_dsttime;     /* type of dst correction */
 };
 
+BOOL isMarkerInit()
+{
+	if(gMarkerCount >= 3 )
+		return true;
+	else
+		return false;
+
+}
 // Definition of a gettimeofday function
- 
+
 void getTimeofDay(struct timeval *tv, struct timezone *tz)
 {
 // Define a structure to receive the current Windows filetime
@@ -156,6 +165,8 @@ BEGIN_MESSAGE_MAP(CMRRKinectDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_BUTTON_RESETCALIB, &CMRRKinectDlg::OnBnClickedButtonResetcalib)
 	ON_BN_CLICKED(IDC_BUTTON_RECORD, &CMRRKinectDlg::OnBnClickedButtonRecord)
 	ON_BN_CLICKED(IDC_BUTTON_RECORDEND, &CMRRKinectDlg::OnBnClickedButtonRecordEnd)
+	ON_BN_CLICKED(IDC_BUTTON_NEWCALIB, &CMRRKinectDlg::OnBnClickedButtonNewcalib)
+	ON_BN_CLICKED(IDC_BUTTON_LOADCALIB, &CMRRKinectDlg::OnBnClickedButtonLoadcalib)
 END_MESSAGE_MAP()
 
 
@@ -372,9 +383,16 @@ DWORD WINAPI KinectThread(LPVOID lpParam) {
 
 					switch( gCalibStatus ){
 						case 0:
-							calib->startCalib(kinect->getRGBImg(),kinect->getDepthImg(), kinect->getDepthGenerator());break;
+							if( isMarkerInit() )
+							{	
+								calib->startCalib( gpMarkerSet, kinect->getDepthGenerator());
+								break;
+							}
+
+							cout << "Please Identify the 3 marker positions" << endl;break;
+							
 						case 1:
-							calib->testCalib(kinect->getRGBImg(),kinect->getDepthImg(), kinect->getDepthGenerator());break;	
+							calib->startCalib( kinect->getRGBImg(), kinect->getDepthImg(),kinect->getDepthGenerator() );break;	
 						default:
 							AfxMessageBox(_T("Please choose Calibration Status"));break;
 					}
@@ -490,12 +508,21 @@ void CMRRKinectDlg::InitKinect() {
 	m_pSkeleton = new KinectSkeletonOpenNI(kinect.getContext(), kinect.getDepthGenerator(), 24);
 	
 	m_pFrameData = new KSFrameData;
-	m_pHandTrackData = new KSHandTrackDataUsingMeanShift(nWidth,nHeight);
+//	m_pHandTrackData = new KSHandTrackDataUsingMeanShift(nWidth,nHeight);
 	m_pTorsoData = new KSTorsoData;
 	m_pElbowData = new KSElbowData;
 	m_pArchivingData = new KSArchivingData;
 	m_pVideoRecorder = new KSUtilsVideoRecorder;
 	m_pFilter = new KSUtilsMAFilter(2);
+
+	for( int i = 0 ; i < 3 ; ++i )
+	{
+		gpMarkerSet[i].x = 0.0f;
+		gpMarkerSet[i].y = 0.0f;
+		gpMarkerSet[i].z = 0.0f;
+	}
+	gMarkerCount = 0;
+
 	kinect.open();
 
 	g_hKinectThread = CreateThread(NULL, 0, KinectThread, this, 0, NULL);
@@ -536,40 +563,70 @@ void CMRRKinectDlg::OnMouseMove(UINT nFlags, CPoint point)
 BOOL CMRRKinectDlg::PreTranslateMessage(MSG* pMsg)
 {
 	// TODO: Add your specialized code here and/or call the base class
-	if(pMsg->message == WM_MOUSEMOVE)
+	if(pMsg->message == WM_LBUTTONDOWN && gnSystemStatus == 1 )
 	{
 		CPoint point;
 		GetCursorPos(&point);
-		
+		ScreenToClient( &point );
+
 		CRect rect;
 		float h,s,v; 
-		GetDlgItem( IDC_FULLFRAME )->GetClientRect( rect );
-		GetDlgItem( IDC_FULLFRAME )->ClientToScreen( rect );
+		GetDlgItem( IDC_FULLFRAME )->GetWindowRect( &rect );
+		ScreenToClient( &rect );
+		point.x = point.x - rect.TopLeft().x - 4;
+		point.y = point.y - rect.TopLeft().y - 11;
 
-		if(point.x>rect.left && point.x<rect.right && point.y>rect.top && point.y<rect.bottom)
-		{
-			HDC hDC = ::GetDC(NULL);
-			COLORREF color;
+		gpMarkerSet[gMarkerCount].x = point.x;
+		gpMarkerSet[gMarkerCount].y = point.y;
+		gpMarkerSet[gMarkerCount].z = 0;
 
-			color = GetPixel(hDC, point.x, point.y); //If you move the dialog window, the position is not accurate.
-			int r = GetRValue(color);
-			int g = GetGValue(color);
-			int b = GetBValue(color);
-			
-			//Test code, Edited 11/3, for test to check the value of h,s,v
-			m_pImgProc->rgb2hsv(b,g,r,v,s,h);
-			CString szColor;
-			//szColor.Format(_T("%d, %d, %d"), r,g,b);
-			//szColor.Format(_T("%d, %d, %d"), (int)h,(int)s,(int)v);
-			//SetDlgItemText(IDC_EDIT8, szColor);
-		}
-		else
-		{
-		}
-		
-		point.x = point.x - 482; //600 offset + 8 nboarder
-		point.y = point.y - 99;  //12 offset + 18 nboarder, Problem, how to get positions invariant to window movement?
-		CString szPos;
+		gMarkerCount += 1;
+		//if(point.x>rect.left && point.x<rect.right && point.y>rect.top && point.y<rect.bottom)
+		//{
+		//	HDC hDC = ::GetDC(NULL);
+		//	COLORREF color;
+
+		//	color = GetPixel(hDC, point.x, point.y); //If you move the dialog window, the position is not accurate.
+		//	int r = GetRValue(color);
+		//	int g = GetGValue(color);
+		//	int b = GetBValue(color);
+		//	
+		//	//Test code, Edited 11/3, for test to check the value of h,s,v
+		//	m_pImgProc->rgb2hsv(b,g,r,v,s,h);
+		//	CString szColor;
+		//	//szColor.Format(_T("%d, %d, %d"), r,g,b);
+		//	//szColor.Format(_T("%d, %d, %d"), (int)h,(int)s,(int)v);
+		//	//SetDlgItemText(IDC_EDIT8, szColor);
+		//}
+		//else
+		//{
+		//}
+		//
+		//point.x = point.x - 482; //600 offset + 8 nboarder
+		//point.y = point.y - 99;  //12 offset + 18 nboarder, Problem, how to get positions invariant to window movement?
+		//CString szPos;
+		cout << "The Point is at: " <<  point.x << ", " << point.y << " " << endl;
+		CString str;
+		str.Format(_T("%f"), gpMarkerSet[0].x);
+		SetDlgItemText(IDC_EDIT6, str);
+		str.Format(_T("%f"), gpMarkerSet[0].y);
+		SetDlgItemText(IDC_EDIT15, str);
+		str.Format(_T("%f"), gpMarkerSet[0].z);
+		SetDlgItemText(IDC_EDIT16, str);
+
+		str.Format(_T("%f"), gpMarkerSet[1].x);
+		SetDlgItemText(IDC_EDIT17, str);
+		str.Format(_T("%f"), gpMarkerSet[1].y);
+		SetDlgItemText(IDC_EDIT18, str);
+		str.Format(_T("%f"), gpMarkerSet[1].z);
+		SetDlgItemText(IDC_EDIT19, str);
+
+		str.Format(_T("%f"), gpMarkerSet[2].x);
+		SetDlgItemText(IDC_EDIT20, str);
+		str.Format(_T("%f"), gpMarkerSet[2].y);
+		SetDlgItemText(IDC_EDIT21, str);
+		str.Format(_T("%f"), gpMarkerSet[2].z);
+		SetDlgItemText(IDC_EDIT22, str);
 		//szPos.Format(_T("%d, %d"),point.x,point.y);
 		//SetDlgItemText(IDC_EDIT7, szPos);
 
@@ -670,23 +727,49 @@ void CMRRKinectDlg::OnBnClickedButtonResetcalib()
 {
 	// TODO: Add your control notification handler code here
 	gCalibStatus = 0;
+	for( int i = 0; i< 3; i++ )
+	{
+		gpMarkerSet[i].x = 0.0f;
+		gpMarkerSet[i].y = 0.0f;
+		gpMarkerSet[i].z = 0.0f;
+	}
+	gMarkerCount = 0;
 }
 
 
 void CMRRKinectDlg::OnBnClickedButtonRecord()
 {
 	// TODO: Add your control notification handler code here
-	m_pVideoRecorder->setIsRun( true );
+	//m_pVideoRecorder->setIsRun( true );
 }
 
 
 void CMRRKinectDlg::OnBnClickedButtonRecordEnd()
 {
 	// TODO: Add your control notification handler code here
-	m_pVideoRecorder->close();
-	m_pVideoRecorder->setIsRun( false );
+	//m_pVideoRecorder->close();
+	//m_pVideoRecorder->setIsRun( false );
+
+}
+
+void CMRRKinectDlg::OnBnClickedButtonNewcalib()
+{
+	// TODO: Add your control notification handler code here
+	gMarkerCount = 0;
+	for( int i = 0 ; i< 3 ; ++i )
+	{
+		gpMarkerSet[i].x = 0.0f;
+		gpMarkerSet[i].y = 0.0f;
+		gpMarkerSet[i].z = 0.0f;
+	}
 
 }
 
 
 
+
+void CMRRKinectDlg::OnBnClickedButtonLoadcalib()
+{
+	// TODO: Add your control notification handler code here
+	gCalibStatus = 1;
+}

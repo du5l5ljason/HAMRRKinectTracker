@@ -199,6 +199,8 @@
   <ItemGroup>
     <ClInclude Include="Background.h" />
     <ClInclude Include="Buffer.h" />
+    <ClInclude Include="ColorModel.h" />
+    <ClInclude Include="Kernel.h" />
     <ClInclude Include="KinectSensorOpenNI.h" />
     <ClInclude Include="KinectSkeletonNUI.h" />
     <ClInclude Include="KSFrameDataSender.h" />
@@ -211,16 +213,15 @@
     <ClInclude Include="KSHandTrackData.h" />
     <ClInclude Include="KSHandTrackDataUsingMeanShift.h" />
     <ClInclude Include="ImgWnd.h" />
-    <ClInclude Include="Kernel.h" />
     <ClInclude Include="KinectCalibration.h" />
     <ClInclude Include="KinectSensor.h" />
     <ClInclude Include="KinectSkeleton.h" />
     <ClInclude Include="KinectSkeletonOpenNI.h" />
-    <ClInclude Include="ColorModel.h" />
     <ClInclude Include="KSArchivingData.h" />
     <ClInclude Include="KSFrameData.h" />
     <ClInclude Include="KSTorsoData.h" />
     <ClInclude Include="KSUtilsMAFilter.h" />
+    <ClInclude Include="KSUtilsVideoRecorder.h" />
     <ClInclude Include="MRRKinect.h" />
     <ClInclude Include="MRRKinectDlg.h" />
     <ClInclude Include="MulticastClient.h" />
@@ -235,6 +236,8 @@
   <ItemGroup>
     <ClCompile Include="Background.cpp" />
     <ClCompile Include="Buffer.cpp" />
+    <ClCompile Include="ColorModel.cpp" />
+    <ClCompile Include="Kernel.cpp" />
     <ClCompile Include="KinectSensorOpenNI.cpp" />
     <ClCompile Include="KinectSkeletonNUI.cpp" />
     <ClCompile Include="KSFrameDataSender.cpp" />
@@ -247,16 +250,15 @@
     <ClCompile Include="KSHandTrackData.cpp" />
     <ClCompile Include="KSHandTrackDataUsingMeanShift.cpp" />
     <ClCompile Include="ImgWnd.cpp" />
-    <ClCompile Include="Kernel.cpp" />
     <ClCompile Include="KinectCalibration.cpp" />
     <ClCompile Include="KinectSensor.cpp" />
     <ClCompile Include="KinectSkeleton.cpp" />
     <ClCompile Include="KinectSkeletonOpenNI.cpp" />
-    <ClCompile Include="ColorModel.cpp" />
     <ClCompile Include="KSArchivingData.cpp" />
     <ClCompile Include="KSFrameData.cpp" />
     <ClCompile Include="KSTorsoData.cpp" />
     <ClCompile Include="KSUtilsMAFilter.cpp" />
+    <ClCompile Include="KSUtilsVideoRecorder.cpp" />
     <ClCompile Include="MRRKinect.cpp" />
     <ClCompile Include="MRRKinectDlg.cpp" />
     <ClCompile Include="MulticastClient.cpp" />

@@ -74,13 +74,14 @@ void KSTorsoData::update( BaseBuf* depthImg, KinectSkeleton* skeleton, KinectCal
 
 	//Calculate Shoulder Rotation Angle
 	POINT3D tcLShoulderPos, tcRShoulderPos, tcTorsoPos;
+	float centerShoulderPosDepth = (currentLShoulderPos.z + currentRShoulderPos.z )/2;
 	tcLShoulderPos.x = currentLShoulderPos.x;
 	tcLShoulderPos.y = currentLShoulderPos.y;
-	tcLShoulderPos.z = currentLShoulderPos.z;
+	tcLShoulderPos.z = centerShoulderPosDepth;
 
 	tcRShoulderPos.x = currentRShoulderPos.x;
 	tcRShoulderPos.y = currentRShoulderPos.y; 
-	tcRShoulderPos.z = currentLShoulderPos.z;  //Use L Shoulder Z value
+	tcRShoulderPos.z = centerShoulderPosDepth;  //Use L Shoulder Z value
 	
 	tcTorsoPos.x = currentTorsoPos.x;
 	tcTorsoPos.y = currentTorsoPos.y;
@@ -92,7 +93,8 @@ void KSTorsoData::update( BaseBuf* depthImg, KinectSkeleton* skeleton, KinectCal
 												);
 	float offsetZ = currentLShoulderPos.z - restLShoulderPos.z;
 
-	int sign2 = ( currentRShoulderPos.z - restRShoulderPos.z - offsetZ ) >0 ? 1:(-1);
+	//int sign2 = ( currentRShoulderPos.z - restRShoulderPos.z - offsetZ ) >0 ? 1:(-1);
+	int sign2 = -1;
 	Plane3D currentPlane;
 	currentPlane = calcPlaneFrom3Points(	currentLShoulderPos,
 											currentRShoulderPos,

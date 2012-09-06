@@ -109,9 +109,6 @@
     <ClInclude Include="Buffer.h">
       <Filter>Header Files\Structure</Filter>
     </ClInclude>
-    <ClInclude Include="ColorModel.h">
-      <Filter>Header Files\Structure</Filter>
-    </ClInclude>
     <ClInclude Include="KinectCalibration.h">
       <Filter>Header Files\Device</Filter>
     </ClInclude>
@@ -154,8 +151,14 @@
     <ClInclude Include="KSFrameDataSender.h">
       <Filter>Header Files\Data</Filter>
     </ClInclude>
-    <ClInclude Include="Kernel.h">
+    <ClInclude Include="KSUtilsVideoRecorder.h">
       <Filter>Header Files\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="Kernel.h">
+      <Filter>Header Files\Structure</Filter>
+    </ClInclude>
+    <ClInclude Include="ColorModel.h">
+      <Filter>Header Files\Structure</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -181,12 +184,6 @@
       <Filter>Source Files\Uitls</Filter>
     </ClCompile>
     <ClCompile Include="Buffer.cpp">
-      <Filter>Source Files\Structure</Filter>
-    </ClCompile>
-    <ClCompile Include="ColorModel.cpp">
-      <Filter>Source Files\Structure</Filter>
-    </ClCompile>
-    <ClCompile Include="Kernel.cpp">
       <Filter>Source Files\Structure</Filter>
     </ClCompile>
     <ClCompile Include="DrawWnd.cpp">
@@ -245,6 +242,15 @@
     </ClCompile>
     <ClCompile Include="KSFrameDataSender.cpp">
       <Filter>Source Files\Data</Filter>
+    </ClCompile>
+    <ClCompile Include="KSUtilsVideoRecorder.cpp">
+      <Filter>Source Files\Uitls</Filter>
+    </ClCompile>
+    <ClCompile Include="Kernel.cpp">
+      <Filter>Source Files\Structure</Filter>
+    </ClCompile>
+    <ClCompile Include="ColorModel.cpp">
+      <Filter>Source Files\Structure</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

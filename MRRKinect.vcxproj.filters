@@ -43,6 +43,12 @@
     <Filter Include="Source Files\View">
       <UniqueIdentifier>{52ef6710-a6ce-402c-8228-c5dc666cf94d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Algorithm">
+      <UniqueIdentifier>{5ec0d928-fcbb-4a46-b01a-45fa6c6a46b5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Algorithm">
+      <UniqueIdentifier>{815e227d-94a4-4f90-a650-4a75a4717936}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="ReadMe.txt" />
@@ -92,9 +98,6 @@
       <Filter>Header Files\Data</Filter>
     </ClInclude>
     <ClInclude Include="KSHandTrackData.h">
-      <Filter>Header Files\Data</Filter>
-    </ClInclude>
-    <ClInclude Include="KSHandTrackDataUsingMeanShift.h">
       <Filter>Header Files\Data</Filter>
     </ClInclude>
     <ClInclude Include="KSTorsoData.h">
@@ -160,6 +163,12 @@
     <ClInclude Include="ColorModel.h">
       <Filter>Header Files\Structure</Filter>
     </ClInclude>
+    <ClInclude Include="KSHandTrackCamShiftTracker.h">
+      <Filter>Header Files\Algorithm</Filter>
+    </ClInclude>
+    <ClInclude Include="KSHandTrackMeanShiftTracker.h">
+      <Filter>Header Files\Algorithm</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="MRRKinect.cpp">
@@ -210,9 +219,6 @@
     <ClCompile Include="KSArchivingData.cpp">
       <Filter>Source Files\Data</Filter>
     </ClCompile>
-    <ClCompile Include="KSHandTrackDataUsingMeanShift.cpp">
-      <Filter>Source Files\Data</Filter>
-    </ClCompile>
     <ClCompile Include="KSElbowData.cpp">
       <Filter>Source Files\Data</Filter>
     </ClCompile>
@@ -251,6 +257,12 @@
     </ClCompile>
     <ClCompile Include="ColorModel.cpp">
       <Filter>Source Files\Structure</Filter>
+    </ClCompile>
+    <ClCompile Include="KSHandTrackCamShiftTracker.cpp">
+      <Filter>Source Files\Algorithm</Filter>
+    </ClCompile>
+    <ClCompile Include="KSHandTrackMeanShiftTracker.cpp">
+      <Filter>Source Files\Algorithm</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

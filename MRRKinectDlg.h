@@ -19,7 +19,8 @@
 #include "UserTypes.h"
 #include "UserConfigs.h"
 #include "KSHandTrackData.h"
-#include "KSHandTrackDataUsingMeanShift.h"
+#include "KSHandTrackMeanshiftTracker.h"
+#include "KSHandTrackCamShiftTracker.h"
 #include "KSTorsoData.h"
 #include "KSElbowData.h"
 #include "KSFrameData.h"
@@ -28,8 +29,6 @@
 
 //For test
 #include "ColorModel.h"
-
-
 
 using namespace xn;
 // CMRRKinectDlg dialog
@@ -48,7 +47,7 @@ private:
 	KSUtilsFilter*			m_pFilter;
 	KSUtilsVideoRecorder*   m_pVideoRecorder;
 	ImageProc*				m_pImgProc;
-	KSHandTrackDataUsingMeanShift* m_pHandTrackData;
+	KSHandTrackData*		m_pTracker;
 	KSTorsoData*			m_pTorsoData;
 	KSElbowData*			m_pElbowData;
 	KSFrameData*			m_pFrameData;
@@ -69,7 +68,7 @@ public:
 	KSUtilsFilter*			getFilter(){return m_pFilter;};
 	KSUtilsVideoRecorder*   getRecorder(){return m_pVideoRecorder;};
 	KinectSkeletonOpenNI*	getSkeleton(){return m_pSkeleton;}
-	KSHandTrackDataUsingMeanShift* getHandTrackData(){return m_pHandTrackData;};
+	KSHandTrackData*		getTracker(){return m_pTracker;};
 	KinectCalibration*		getCalibration(){return m_pCalib;};
 	ImageProc*				getImgProc(){return m_pImgProc;};
 	KSTorsoData*			getTorsoData(){return m_pTorsoData;};
@@ -86,7 +85,7 @@ public:
 	~CMRRKinectDlg(void){
 		//if(m_wndFull!=NULL)delete m_wndFull;
 		//if(m_pSkeleton!=NULL)delete m_pSkeleton;
-		//if(m_pHandTrackData!=NULL)delete m_pHandTrackData;
+		//if(m_pTracker!=NULL)delete m_pTracker;
 		//if(m_pBG!=NULL)delete m_pBG;
 		//if(m_pFilter!=NULL)delete m_pFilter;
 		//if(m_pVideoRecorder!=NULL)delete m_pVideoRecorder;
@@ -137,4 +136,6 @@ public:
 	afx_msg void OnRadio1();
 	afx_msg void OnRadio2();
 	afx_msg void OnRadio3();
+	afx_msg void OnRadio4();
+	afx_msg void OnBnClickedButtonEndRun();
 };

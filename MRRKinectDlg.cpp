@@ -24,11 +24,12 @@ using namespace std;
 
 bool g_RunKinect = true;
 HANDLE g_hKinectThread;
-int gnPointMode=1;
-int gnSystemStatus = _SS_REST;
+int gnSystemStatus = _SS_TRACK;
 int gCalibStatus = 0;
 POINT3D gpMarkerSet[3];
 int gMarkerCount = 0;
+int gDataStreamStatus = _DS_CLOSE;
+bool gIsSkeletonUpdated = false;
 #if defined(_MSC_VER) || defined(_MSC_EXTENSIONS)
   #define DELTA_EPOCH_IN_MICROSECS  11644473600000000Ui64
 #else
@@ -140,7 +141,7 @@ CMRRKinectDlg::CMRRKinectDlg(CWnd* pParent /*=NULL*/)
 	m_pModel = new ColorModel;
 	m_pCalib = new KinectCalibration;
 
-	m_nDisplayType = 0;
+	m_nDisplayType = 3;
 }
 
 void CMRRKinectDlg::DoDataExchange(CDataExchange* pDX)
@@ -166,11 +167,11 @@ BEGIN_MESSAGE_MAP(CMRRKinectDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_BUTTON_RESETCALIB, &CMRRKinectDlg::OnBnClickedButtonResetcalib)
 	ON_BN_CLICKED(IDC_BUTTON_RECORD, &CMRRKinectDlg::OnBnClickedButtonRecord)
 	ON_BN_CLICKED(IDC_BUTTON_RECORDEND, &CMRRKinectDlg::OnBnClickedButtonRecordEnd)
-	ON_BN_CLICKED(IDC_BUTTON_NEWCALIB, &CMRRKinectDlg::OnBnClickedButtonNewcalib)
-	ON_BN_CLICKED(IDC_BUTTON_LOADCALIB, &CMRRKinectDlg::OnBnClickedButtonLoadcalib)
 	ON_COMMAND(IDC_RADIO1, &CMRRKinectDlg::OnRadio1)
 	ON_COMMAND(IDC_RADIO2, &CMRRKinectDlg::OnRadio2)
 	ON_COMMAND(IDC_RADIO3, &CMRRKinectDlg::OnRadio3)
+	ON_COMMAND(IDC_RADIO4, &CMRRKinectDlg::OnRadio4)
+	ON_BN_CLICKED(IDC_BUTTON_ENDRUN, &CMRRKinectDlg::OnBnClickedButtonEndRun)
 END_MESSAGE_MAP()
 
 
@@ -273,7 +274,7 @@ void CMRRKinectDlg::InitImgWnd() {
 	m_wndFull = new CDrawWnd();
 	m_wndFull->Create( WS_VISIBLE , rect, this, IDR_FULLFRAME );
 
-	
+	CheckRadioButton(IDC_RADIO1, IDC_RADIO4, IDC_RADIO3);
 
 }
 
@@ -294,20 +295,33 @@ DWORD WINAPI ShowStreams(LPVOID lpParam) {
 					fullWnd->ShowImg16( w, h, wb, kinect->getDepthImg()->getData());//Display depthbreak;
 				break;
 			case 2: wb = kinect->getRGBImg()->widthBytes();
-					fullWnd->ShowImg(w, h, wb, kinect->getRGBImg()->getData());//Display imagebreak;
+					//fullWnd->ShowImg(w, h, wb, kinect->getRGBImg()->getData());//Display imagebreak;
+					fullWnd->ShowImg(w, h, wb, dlg->getTracker()->getImg()->getData());
 					fullWnd->Invalidate();
 					break;
-			case 0: wb = kinect->getRGBImg()->widthBytes();
+			case 3: wb = kinect->getRGBImg()->widthBytes();
 					fullWnd->ShowImg(w,h,wb,kinect->getRGBImg()->getData());
-					if(dlg->getSkeleton()->update())
+					if(gIsSkeletonUpdated)
 					{
-						//if(dlg->getHandTrackData()->isReady())
-							//dlg->getSkeleton()->setJointPosAt(XN_SKEL_RIGHT_HAND, dlg->getHandTrackData()->getHandPos(), 1.0f);			//set hand position to the skeleton.
 						fullWnd->showSkeleton(dlg->getSkeleton()->getJointPos());
 					}
-					//fullWnd->showHandJoint(dlg->getHandTrackData()->getHandPos());
+
+					Rect modRect;
+					modRect.x = MODEL_StartX - (int)(MODEL_W/2);
+					modRect.y = MODEL_StartY - (int)(MODEL_H/2);
+					modRect.width = MODEL_W;
+					modRect.height = MODEL_H;
+					fullWnd->showRect( modRect );
+
+					Rect curRect;
+					curRect.width = dlg->getTracker()->getPrevRect().width;
+					curRect.height = dlg->getTracker()->getPrevRect().height;
+					curRect.x = dlg->getTracker()->getPrevRect().x;
+					curRect.y = dlg->getTracker()->getPrevRect().y;
+					fullWnd->showRect( curRect );
 					fullWnd->Invalidate();
 				break;
+			case 0: fullWnd->Invalidate();break;
 	}
 
 	//Test code: Edited by Tingfang 10/28
@@ -316,16 +330,11 @@ DWORD WINAPI ShowStreams(LPVOID lpParam) {
 
 	//fullWnd->ShowImg(w, h, wb, dlg->getHandTrackData()->getImg()->getData());
 	
-	/*DO NOT USE ENDPOINT
-	//Rect modRect;
-	//modRect.x = MODEL_StartX - (int)(MODEL_W/2);
-	//modRect.y = MODEL_StartY - (int)(MODEL_H/2);
-	//modRect.width = MODEL_W;
-	//modRect.height = MODEL_H;
-	//fullWnd->showRect( modRect );
-	WARNING END*/
-	//if( dlg->getRecorder()->isRun() )
-	//		dlg->getRecorder()->record( kinect->getRGBImg() );
+	//DO NOT USE ENDPOINT
+
+	//WARNING END*/
+	if( dlg->getRecorder()->isRun() )
+			dlg->getRecorder()->record( kinect->getRGBImg() );
 
 	return 0;
 }
@@ -336,24 +345,18 @@ DWORD WINAPI KinectThread(LPVOID lpParam) {
 	KinectCalibration* calib = dlg->getCalibration();
 	Background* bg = dlg->getBG();
 	KinectSkeletonOpenNI* skeleton = dlg->getSkeleton();
-
-	/*DO NOT USE ENDPOINT
-	//KSHandTrackDataUsingMeanShift* handData = dlg->getHandTrackData();
-	*/
+	KSHandTrackData* handData = dlg->getTracker();
 	KSTorsoData* torsoData = dlg->getTorsoData();
 	KSFrameData* frameData = dlg->getFrameData();
 	KSElbowData* elbowData = dlg->getElbowData();
 	KSArchivingData* archiveData = dlg->getArchivingData();
 	
-	/*DO NOT USE ENDPOINT
-	//debug code ends
-	//int nCenterX = MODEL_StartX;
-	//int nCenterY = MODEL_StartY;*/
 	struct timeval timeStamp;
 	double lastFrameTime = 0.0f;
 	double currentFrameTime = 0.0f;
 	int frameID = 0;
 	KSFrameDataSender sender;
+
 
 	sender.openServer();
 	while(g_RunKinect) {
@@ -362,14 +365,6 @@ DWORD WINAPI KinectThread(LPVOID lpParam) {
 		frameID = frameID + 1;
 
 		kinect->update();
-		skeleton->update();
-
-		//if(skeleton->update() )
-		//	dlg->getFilter()->smoothSkeleton( skeleton );
-		//if(!bg->isBG())
-		//{
-		//	bg->init(kinect->getRGBImg(), kinect->getDepthImg()); //将背景文件拷进去
-		//}
 
 		switch( gnSystemStatus ){
 			case _SS_REST: break;
@@ -394,69 +389,81 @@ DWORD WINAPI KinectThread(LPVOID lpParam) {
 				}
 			case _SS_TRACK:	
 				{
-					if( skeleton->update()&&/*handData->isReady()*/torsoData->isReady()&&elbowData->isReady() )
+					gIsSkeletonUpdated = skeleton->update();
+					if( gIsSkeletonUpdated && handData->isReady() && torsoData->isReady()&&elbowData->isReady() )
 					{
-						/*DO NOT USE ENDPOINT
-						//nCenterX = handData->getHandPos().x;
-						//nCenterY = handData->getHandPos().y;
-						//The new interfaces 4.12/
+
 						//------------
 						//UPDATE DATA
 						//------------
 						//1. handData 2. torsoData 3. elbowData 
-						//handData->update(						
-						//	kinect->getRGBImg(),
-						//	kinect->getDepthImg(),
-						//	nCenterX,			
-						//	nCenterY,
-						//	ROI_SIZE_W,																		//4.12 Can we change the ROI size depending on the tracking performance? if tracking lost, 
-						//	ROI_SIZE_H
-						//);
-						*/
-
-						torsoData->update( kinect->getDepthImg(), skeleton, calib, kinect->getDepthGenerator() );
-						elbowData->update( skeleton, kinect->getDepthGenerator());
-						getTimeofDay(&timeStamp, NULL);
-						currentFrameTime = timeStamp.tv_sec + (timeStamp.tv_usec/1000000.0);						
-						
-						frameData->update(frameID, 
-							currentFrameTime,
-							skeleton->getJoint3DPosAt(XN_SKEL_LEFT_SHOULDER).x,
-							skeleton->getJoint3DPosAt(XN_SKEL_LEFT_SHOULDER).y,
-							skeleton->getJoint3DPosAt(XN_SKEL_LEFT_SHOULDER).z,
-							skeleton->getJoint3DPosAt(XN_SKEL_RIGHT_SHOULDER).x,
-							skeleton->getJoint3DPosAt(XN_SKEL_RIGHT_SHOULDER).y,
-							skeleton->getJoint3DPosAt(XN_SKEL_RIGHT_SHOULDER).z,
-							skeleton->getJoint3DPosAt(XN_SKEL_TORSO).x,
-							skeleton->getJoint3DPosAt(XN_SKEL_TORSO).y,
-							skeleton->getJoint3DPosAt(XN_SKEL_TORSO).z,
-							torsoData->getTorsoComps(),
-							torsoData->getShoulderRot(),
-							elbowData->getElbowOpening()
-							);																				//if tracking is success, we record the data, frame data updates.
-
-						sender.getData()->update(
-							frameData->getFrameID(),
-							frameData->getTimestamp(),
-							frameData->getLShoulderX(),
-							frameData->getLShoulderY(),
-							frameData->getLShoulderZ(),
-							frameData->getRShoulderX(),
-							frameData->getRShoulderY(),
-							frameData->getRShoulderZ(),
-							frameData->getTorsoX(),
-							frameData->getTorsoY(),
-							frameData->getTorsoZ(),
-							frameData->getTorsoComp(),
-							frameData->getShoulderRot(),
-							frameData->getElbowOpen()
+						  handData->update(            
+							kinect->getRGBImg(),
+							kinect->getDepthImg(),
+							handData->getHandPos().x,
+							handData->getHandPos().y,
+							handData->getPrevRect().width,                                    //4.12 Can we change the ROI size depending on the tracking performance? if tracking lost, 
+							handData->getPrevRect().height 
 							);
+ 
 
-						cout << "The left shoulder pos is : " << frameData->getLShoulderX ()<< ", " << frameData->getLShoulderY() << ", " << frameData->getLShoulderZ() << endl; 
-					    cout << "The right shoulder pos is : " << frameData->getRShoulderX ()<< ", " << frameData->getRShoulderY() << ", " << frameData->getRShoulderZ() << endl; 
+						bool isTorsoUpdated =torsoData->update( kinect->getDepthImg(), skeleton, calib, kinect->getDepthGenerator() );
+						bool isElbowUpdated =elbowData->update( skeleton, kinect->getDepthGenerator());
 
-						sender.sendData();
+						//cout << isTorsoUpdated << ",  " << isElbowUpdated << endl;
+						if( gDataStreamStatus == _DS_CLOSE || gDataStreamStatus == _DS_READY)
+							gDataStreamStatus = isTorsoUpdated && isElbowUpdated;
+						else if( gDataStreamStatus == _DS_OPEN )
+						{
+							if( !(isTorsoUpdated && isElbowUpdated ) )
+								gDataStreamStatus = _DS_CLOSE;
+						}
+						
+						//cout << "dataStreamStatus: " << gDataStreamStatus << endl;
+						
+			/*			if(gDataStreamStatus == _DS_OPEN)
+						{*/
+							getTimeofDay(&timeStamp, NULL);
+							currentFrameTime = timeStamp.tv_sec + (timeStamp.tv_usec/1000000.0);						
+						
+							frameData->update(frameID, 
+								currentFrameTime,
+								skeleton->getJoint3DPosAt(XN_SKEL_LEFT_SHOULDER).x,
+								skeleton->getJoint3DPosAt(XN_SKEL_LEFT_SHOULDER).y,
+								skeleton->getJoint3DPosAt(XN_SKEL_LEFT_SHOULDER).z,
+								skeleton->getJoint3DPosAt(XN_SKEL_RIGHT_SHOULDER).x,
+								skeleton->getJoint3DPosAt(XN_SKEL_RIGHT_SHOULDER).y,
+								skeleton->getJoint3DPosAt(XN_SKEL_RIGHT_SHOULDER).z,
+								skeleton->getJoint3DPosAt(XN_SKEL_TORSO).x,
+								skeleton->getJoint3DPosAt(XN_SKEL_TORSO).y,
+								skeleton->getJoint3DPosAt(XN_SKEL_TORSO).z,
+								torsoData->getTorsoComps(),
+								torsoData->getShoulderRot(),
+								elbowData->getElbowOpening()
+								);																				//if tracking is success, we record the data, frame data updates.
 
+							sender.getData()->update(
+								frameData->getFrameID(),
+								frameData->getTimestamp(),
+								frameData->getLShoulderX(),
+								frameData->getLShoulderY(),
+								frameData->getLShoulderZ(),
+								frameData->getRShoulderX(),
+								frameData->getRShoulderY(),
+								frameData->getRShoulderZ(),
+								frameData->getTorsoX(),
+								frameData->getTorsoY(),
+								frameData->getTorsoZ(),
+								frameData->getTorsoComp(),
+								frameData->getShoulderRot(),
+								frameData->getElbowOpen()
+								);
+
+							//cout << "The left shoulder pos is : " << frameData->getLShoulderX ()<< ", " << frameData->getLShoulderY() << ", " << frameData->getLShoulderZ() << endl; 
+							//cout << "The right shoulder pos is : " << frameData->getRShoulderX ()<< ", " << frameData->getRShoulderY() << ", " << frameData->getRShoulderZ() << endl; 
+
+							sender.sendData();
+		/*				}*/
 						if( archiveData->isArchiving())
 							archiveData->addAFrame(dlg->getFrameData());
 						
@@ -464,7 +471,7 @@ DWORD WINAPI KinectThread(LPVOID lpParam) {
 						//DISPLAY DATA
 						//------------
 						CString str;
-						str.Format(_T("%lf"), dlg->getTorsoData()->getTorsoComps());
+						//str.Format(_T("%lf"), dlg->getTorsoData()->getTorsoComps());
 						dlg->SetDlgItemText(IDC_EDIT12, str);
 						str.Format(_T("%lf"), dlg->getElbowData()->getElbowOpening());
 						dlg->SetDlgItemText(IDC_EDIT13, str);
@@ -503,12 +510,12 @@ void CMRRKinectDlg::InitKinect() {
 	m_pSkeleton = new KinectSkeletonOpenNI(kinect.getContext(), kinect.getDepthGenerator(), 24);
 	
 	m_pFrameData = new KSFrameData;
-//	m_pHandTrackData = new KSHandTrackDataUsingMeanShift(nWidth,nHeight);
+	m_pTracker = new KSHandTrackMeanshiftTracker(nWidth,nHeight);
 	m_pTorsoData = new KSTorsoData;
 	m_pElbowData = new KSElbowData;
 	m_pArchivingData = new KSArchivingData;
 	m_pVideoRecorder = new KSUtilsVideoRecorder;
-	m_pFilter = new KSUtilsMAFilter(2);
+	//m_pFilter = new KSUtilsMAFilter(2);
 
 	for( int i = 0 ; i < 3 ; ++i )
 	{
@@ -576,55 +583,6 @@ BOOL CMRRKinectDlg::PreTranslateMessage(MSG* pMsg)
 		gpMarkerSet[gMarkerCount].z = 0;
 
 		gMarkerCount += 1;
-		//if(point.x>rect.left && point.x<rect.right && point.y>rect.top && point.y<rect.bottom)
-		//{
-		//	HDC hDC = ::GetDC(NULL);
-		//	COLORREF color;
-
-		//	color = GetPixel(hDC, point.x, point.y); //If you move the dialog window, the position is not accurate.
-		//	int r = GetRValue(color);
-		//	int g = GetGValue(color);
-		//	int b = GetBValue(color);
-		//	
-		//	//Test code, Edited 11/3, for test to check the value of h,s,v
-		//	m_pImgProc->rgb2hsv(b,g,r,v,s,h);
-		//	CString szColor;
-		//	//szColor.Format(_T("%d, %d, %d"), r,g,b);
-		//	//szColor.Format(_T("%d, %d, %d"), (int)h,(int)s,(int)v);
-		//	//SetDlgItemText(IDC_EDIT8, szColor);
-		//}
-		//else
-		//{
-		//}
-		//
-		//point.x = point.x - 482; //600 offset + 8 nboarder
-		//point.y = point.y - 99;  //12 offset + 18 nboarder, Problem, how to get positions invariant to window movement?
-		//CString szPos;
-		cout << "The Point is at: " <<  point.x << ", " << point.y << " " << endl;
-		CString str;
-		str.Format(_T("%f"), gpMarkerSet[0].x);
-		SetDlgItemText(IDC_EDIT6, str);
-		str.Format(_T("%f"), gpMarkerSet[0].y);
-		SetDlgItemText(IDC_EDIT15, str);
-		str.Format(_T("%f"), gpMarkerSet[0].z);
-		SetDlgItemText(IDC_EDIT16, str);
-
-		str.Format(_T("%f"), gpMarkerSet[1].x);
-		SetDlgItemText(IDC_EDIT17, str);
-		str.Format(_T("%f"), gpMarkerSet[1].y);
-		SetDlgItemText(IDC_EDIT18, str);
-		str.Format(_T("%f"), gpMarkerSet[1].z);
-		SetDlgItemText(IDC_EDIT19, str);
-
-		str.Format(_T("%f"), gpMarkerSet[2].x);
-		SetDlgItemText(IDC_EDIT20, str);
-		str.Format(_T("%f"), gpMarkerSet[2].y);
-		SetDlgItemText(IDC_EDIT21, str);
-		str.Format(_T("%f"), gpMarkerSet[2].z);
-		SetDlgItemText(IDC_EDIT22, str);
-		//szPos.Format(_T("%d, %d"),point.x,point.y);
-		//SetDlgItemText(IDC_EDIT7, szPos);
-
 	}
 	if(pMsg->message == WM_KEYDOWN)
 	{
@@ -656,15 +614,6 @@ void CMRRKinectDlg::OnBnClickedButtonReset()
 void CMRRKinectDlg::OnBnClickedButtonSetmodel()
 {
 	// TODO: Add your control notification handler code here
-	/*DO NOT USE HAND TRACK
-	if(m_pHandTrackData!=NULL)
-		m_pHandTrackData->setReady(true);*/
-	if(m_pTorsoData!=NULL)
-		m_pTorsoData->setReady(true);
-	if(m_pElbowData!=NULL)
-		m_pElbowData->setReady(true);
-		
-
 	POINT3D shoulderCenterPos;
 	shoulderCenterPos.x = (m_pSkeleton->getJointPosAt(XN_SKEL_LEFT_SHOULDER).x + m_pSkeleton->getJointPosAt(XN_SKEL_RIGHT_SHOULDER).x )/2;
 	shoulderCenterPos.y = (m_pSkeleton->getJointPosAt(XN_SKEL_LEFT_SHOULDER).y + m_pSkeleton->getJointPosAt(XN_SKEL_RIGHT_SHOULDER).y )/2;
@@ -678,12 +627,31 @@ void CMRRKinectDlg::OnBnClickedButtonSetmodel()
 	Plane3D plane;
 	plane = m_pTorsoData->calcPlaneFrom3Points(m_pTorsoData->getRestLShoulderPos(), m_pTorsoData->getRestRShoulderPos(), m_pTorsoData->getRestTorsoPos());
 	m_pTorsoData->setRestPlane( plane );
+	
+	Rect modRect;
+	modRect.x = MODEL_StartX - (int)(MODEL_W/2);
+	modRect.y = MODEL_StartY - (int)(MODEL_H/2);
+	modRect.width = MODEL_W;
+	modRect.height = MODEL_H;
+
+	m_pTracker->init( kinect.getRGBImg(), modRect );
+
+	if(gDataStreamStatus == _DS_READY)  gDataStreamStatus = _DS_OPEN;
 	/*DO NOT USE ENDPOINT TRACK
 	m_pHandTrackData->setInit( false );
 	
 	m_pHandTrackData->setRestPosDepth(torso3DPos.z);
 	gnPointMode = 2;
 	*/
+	m_pTracker->setRestPosDepth( m_pTorsoData->getRestTorsoPos().z );
+	if(m_pTracker!=NULL)
+		m_pTracker->setReady(true);
+	if(m_pTorsoData!=NULL)
+		m_pTorsoData->setReady(true);
+	if(m_pElbowData!=NULL)
+		m_pElbowData->setReady(true);
+ 
+
 }
 
 void CMRRKinectDlg::OnBnClickedButtonArchive()
@@ -735,15 +703,16 @@ void CMRRKinectDlg::OnBnClickedButtonResetcalib()
 void CMRRKinectDlg::OnBnClickedButtonRecord()
 {
 	// TODO: Add your control notification handler code here
-	//m_pVideoRecorder->setIsRun( true );
+	m_pVideoRecorder->setIsRun( true );
+	m_pVideoRecorder->init();
 }
 
 
 void CMRRKinectDlg::OnBnClickedButtonRecordEnd()
 {
 	// TODO: Add your control notification handler code here
-	//m_pVideoRecorder->close();
-	//m_pVideoRecorder->setIsRun( false );
+	m_pVideoRecorder->close();
+	m_pVideoRecorder->setIsRun( false );
 
 }
 
@@ -787,5 +756,20 @@ void CMRRKinectDlg::OnRadio2()
 void CMRRKinectDlg::OnRadio3()
 {
 	// TODO: Add your command handler code here
+	m_nDisplayType = 3;
+}
+
+
+void CMRRKinectDlg::OnRadio4()
+{
+	// TODO: Add your command handler code here
 	m_nDisplayType = 0;
+}
+
+
+void CMRRKinectDlg::OnBnClickedButtonEndRun()
+{
+	// TODO: Add your control notification handler code here
+	if(gDataStreamStatus == 2)
+		gDataStreamStatus =1;
 }

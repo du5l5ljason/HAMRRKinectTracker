@@ -51,9 +51,9 @@ public:
 	void setRestPlane(Plane3D plane){ restTorsoPlane = plane;};
 	void setTorsoComps(float tc){torsoComps = tc;};
 	void setShoulderRot(float sr){shoulderRot = sr;};
-	void update( BaseBuf*, KinectSkeleton*, KinectCalibration* , DepthGenerator* );
+	bool update( BaseBuf*, KinectSkeleton*, KinectCalibration* , DepthGenerator* );
 public:
-	KSTorsoData(void):torsoComps(0.0f),shoulderRot(0.0f), m_bIsReady(false){
+	KSTorsoData(void):torsoComps(-10000.0f),shoulderRot(-10000.0f), m_bIsReady(false){
 		restLShoulderPos.x = 0.0f;
 		restLShoulderPos.y = 0.0f;
 		restLShoulderPos.z = 0.0f;

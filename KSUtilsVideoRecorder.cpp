@@ -8,12 +8,13 @@ bool KSUtilsVideoRecorder::init()
 	time_t t = time(0);
 	strftime( recordFileName, sizeof(recordFileName), _VIDEO_RECORD_FILE_PATH"VIDEO_%Y%m%d_%H%M%S.mpeg", localtime(&t) );
 
-	double fps = 30.0f;
+	double fps = 20.0f;
+
 	m_pVideoWriter = cvCreateVideoWriter(
 		recordFileName,
-		CV_FOURCC( 'M', 'J', 'P', 'G' ),
+		CV_FOURCC('P', 'I', 'M', '1'),
 		fps,
-		cvSize( _RECORDVIDEO_WIDTH, _RECORDVIDEO_HEIGHT ),
+		cvSize( _RECORDVIDEO_WIDTH/2, _RECORDVIDEO_HEIGHT/2 ),
 		1
 		);
 
@@ -22,26 +23,25 @@ bool KSUtilsVideoRecorder::init()
 
 void KSUtilsVideoRecorder::record( BaseBuf* img )
 {
-	if( !isInit() )
-		setInit( init() );
 
 	IplImage* imgDst = cvCreateImage(cvSize(img->width(), img->height()), 8, 3 ); // By default we record RGB image sequences.
 	m_imgProc.cvtBuffertoIplImage( img, imgDst );
-	
-	//doDownSampling();
-	writeFrameIntoFile( imgDst );
+	IplImage* imgDSampledDst = cvCreateImage(cvSize(img->width()/2, img->height()/2), 8,3);
+	doDownSampling(imgDst, imgDSampledDst,IPL_GAUSSIAN_5x5);
+	writeFrameIntoFile( imgDSampledDst );
 	cvReleaseImage(&imgDst);
+	cvReleaseImage(&imgDSampledDst);
 }
 
 void KSUtilsVideoRecorder::close()
 {
-	m_bIsInit = false;
+	cvReleaseVideoWriter( & m_pVideoWriter );
 }
 
 void KSUtilsVideoRecorder::doDownSampling( IplImage* imgSrc, IplImage* imgDst, int filter = IPL_GAUSSIAN_5x5 )
 {
 	assert( imgSrc->width%2 == 0 && imgSrc->height%2 == 0);
-	cvPyrDown( imgSrc,imgDst );
+	cvPyrDown( imgSrc,imgDst, filter );
 }
 
 void KSUtilsVideoRecorder::writeFrameIntoFile( IplImage* img )

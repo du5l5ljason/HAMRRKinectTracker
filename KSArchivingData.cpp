@@ -16,6 +16,7 @@ void KSArchivingData::addAFrame(KSFrameData* frameData)
 	dataset[nFrames].setTorsoComp( frameData->getTorsoComp());
 	dataset[nFrames].setShoulderRot( frameData->getShoulderRot());
 	dataset[nFrames].setElbowOpen( frameData->getElbowOpen());
+	//dataset[nFrames].setHand( frameData->getHandX(), frameData->getHandY(), frameData->getHandZ());
 	nFrames = nFrames + 1;
 
 
@@ -34,7 +35,7 @@ void KSArchivingData::saveArchivingData()
 	
 	for( int i = 0 ; i< nFrames; ++i)
 	{
-		fprintf( fp, "%d %lf %f %f %f %f %f %f %f %f %f %f %f %f\n", dataset[i].getFrameID(), dataset[i].getTimestamp(), dataset[i].getLShoulderX(),dataset[i].getLShoulderY(), dataset[i].getLShoulderZ(), dataset[i].getRShoulderX(),dataset[i].getRShoulderY(),dataset[i].getRShoulderZ(), dataset[i].getTorsoX(),dataset[i].getTorsoY(),dataset[i].getTorsoZ(),dataset[i].getTorsoComp(),dataset[i].getShoulderRot(),dataset[i].getElbowOpen() );
+		fprintf( fp, "%d %lf %f %f %f %f %f %f %f %f %f %f %f %f\n", dataset[i].getFrameID(), dataset[i].getTimestamp(), dataset[i].getLShoulderX(),dataset[i].getLShoulderY(), dataset[i].getLShoulderZ(), dataset[i].getRShoulderX(),dataset[i].getRShoulderY(),dataset[i].getRShoulderZ(), dataset[i].getTorsoX(),dataset[i].getTorsoY(),dataset[i].getTorsoZ(),dataset[i].getTorsoComp(),dataset[i].getShoulderRot(),dataset[i].getElbowOpen()/*dataset[i].getHandX(),dataset[i].getHandY(),dataset[i].getHandZ()*/ );
 	}
 
 	fclose( fp );

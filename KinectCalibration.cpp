@@ -37,78 +37,92 @@ KinectCalibration::~KinectCalibration(void)
 void KinectCalibration::startCalib(BaseBuf* imgRGB, BaseBuf* imgDepth, DepthGenerator* pDepthGen)
 {
 	const char* fileName = _CALIB_FILE_PATH"CalibrationData.txt";
-	if(loadCalibrationDatafromFile(fileName)){
-		cout << "Already have calibration data, load data from file\n" << endl;
+	if(!loadCalibrationDatafromFile(fileName)){
+		cout << "There is no calibration data file, please add a new calibration\n" << endl;
 		return;
 	}
 	
-	//segmentation
-	segbyColor(imgRGB, imgRGB);
+	cout << "Load from Calibration file!" << endl;
+	////segmentation
+	//segbyColor(imgRGB, imgRGB);
 
-	IplImage* imgTemp = cvCreateImage(cvSize(imgRGB->width(), imgRGB->height()),8,1);
-	BYTE* pTemp = NULL;
-	BYTE* pSrc = NULL;
-	for( int j=0;j<imgRGB->height();j++)
-	{
-		pTemp = (BYTE*)(imgTemp->imageData+j*imgTemp->widthStep);
-		pSrc = (BYTE*)(imgRGB->getData()+j*imgRGB->widthBytes());
-		for( int i=0;i<imgRGB->width();i++,pTemp +=1, pSrc += 3)
-		{
-			*pTemp = *pSrc;
-		}
-	}
+	//IplImage* imgTemp = cvCreateImage(cvSize(imgRGB->width(), imgRGB->height()),8,1);
+	//BYTE* pTemp = NULL;
+	//BYTE* pSrc = NULL;
+	//for( int j=0;j<imgRGB->height();j++)
+	//{
+	//	pTemp = (BYTE*)(imgTemp->imageData+j*imgTemp->widthStep);
+	//	pSrc = (BYTE*)(imgRGB->getData()+j*imgRGB->widthBytes());
+	//	for( int i=0;i<imgRGB->width();i++,pTemp +=1, pSrc += 3)
+	//	{
+	//		*pTemp = *pSrc;
+	//	}
+	//}
 
-	POINT3D* pImgPtSet = new POINT3D[3];
-	findMarkers(imgTemp, pImgPtSet);
+	//POINT3D* pImgPtSet = new POINT3D[3];
+	//findMarkers(imgTemp, pImgPtSet);
 
-	////copy from basebuf to IplImage
-	identifyIP( pImgPtSet );		//identify the 3 points according to their position, because the three vertaxes are different in an L-frame
-	for(int i=0;i<3;i++)
-	{
-		m_pGP[i] = cvtIPtoCamP( pImgPtSet[i] , pDepthGen );		
-	}
+	//////copy from basebuf to IplImage
+	//identifyIP( pImgPtSet );		//identify the 3 points according to their position, because the three vertaxes are different in an L-frame
+	//for(int i=0;i<3;i++)
+	//{
+	//	m_pGP[i] = cvtIPtoCamP( pImgPtSet[i] , pDepthGen );		
+	//}
 
-	computeRot();
-	computeTran();
-	if(isSaving())
-	{
-		if(gnCounter<=_NFRAMES)
-		{
-			for(int i = 0; i<3; ++i)
-			{
-				for(int j = 0; j<3; ++j)
-				{
-					tempRot[i][j] += m_matRot[i][j];
-				}
-			}
-			for(int i =0; i<3 ; ++i )
-				tempTran[i][1] += m_matTran[i][1];
-			gnCounter++;
-			return;
-		}
-		//set rotation and translation according to the mean value
-		for(int i = 0; i<3; ++i)
-		{
-				for(int j = 0; j<3; ++j)
-				{
-					m_matRot[i][j] = tempRot[i][j]/100.0f;
-				}
-		}
-		for(int i =0; i<3 ; ++i )
-			m_matTran[i][1] = tempTran[i][1]/100.0f;
+	//computeRot();
+	//computeTran();
+	//if(isSaving())
+	//{
+	//	if(gnCounter<=_NFRAMES)
+	//	{
+	//		for(int i = 0; i<3; ++i)
+	//		{
+	//			for(int j = 0; j<3; ++j)
+	//			{
+	//				tempRot[i][j] += m_matRot[i][j];
+	//			}
+	//		}
+	//		for(int i =0; i<3 ; ++i )
+	//			tempTran[i][1] += m_matTran[i][1];
+	//		gnCounter++;
+	//		return;
+	//	}
+	//	//set rotation and translation according to the mean value
+	//	for(int i = 0; i<3; ++i)
+	//	{
+	//			for(int j = 0; j<3; ++j)
+	//			{
+	//				m_matRot[i][j] = tempRot[i][j]/100.0f;
+	//			}
+	//	}
+	//	for(int i =0; i<3 ; ++i )
+	//		m_matTran[i][1] = tempTran[i][1]/100.0f;
 
-		saveCalibrationDatatoFile();
-		gnCounter = 0;
-		m_isSaving = false;
-	}
-	delete[] pImgPtSet;
-	cvReleaseImage(&imgTemp);
+	//	saveCalibrationDatatoFile();
+	//	gnCounter = 0;
+	//	m_isSaving = false;
+	//}
+	//delete[] pImgPtSet;
+	//cvReleaseImage(&imgTemp);
 }
 
 void KinectCalibration::startCalib(POINT3D* pImgPtSet, DepthGenerator* pDepthGen)
 {
+	const char* fileName = _CALIB_FILE_PATH"CalibrationData.txt";
+	if(loadCalibrationDatafromFile(fileName)){
+		cout << "Already have calibration data, load data from file\n" << endl;
+		return;
+	}
+
+	identifyIP( pImgPtSet );		//identify the 3 points according to their position, because the three vertaxes are different in an L-frame
+	
+	for(int i=0;i<3;i++)
+	{
+		m_pGP[i] = cvtIPtoCamP( pImgPtSet[i] , pDepthGen );		
+	}
 	computeRot();
 	computeTran();
+
 }
 void KinectCalibration::testCalib(BaseBuf* imgRGB, BaseBuf* imgDepth, DepthGenerator* pDepthGen)
 {

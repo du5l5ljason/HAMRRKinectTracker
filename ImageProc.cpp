@@ -46,6 +46,64 @@ int popQueue(Queue* queue)
 
 }
 
+void ImageProc::And( BaseBuf *src1, BaseBuf *src2, BaseBuf *dst )
+{
+	if( src1->width() != src2->width() || src1->height() != src2->height() || src1->widthBytes() != src2->widthBytes() )
+		return;
+	if( src1->width() != dst->width() || src1->height() != dst->height() || src1->widthBytes() != dst->widthBytes() )
+		return;
+
+	int nChannel = src1->widthBytes()/src1->width();
+	BYTE *pSrc1 = src1->getData();
+	BYTE *pSrc2 = src2->getData();
+	BYTE *pDst = dst->getData();
+	for( int j = 0 ; j < src1->height(); ++j )
+	{
+		for( int i = 0; i < src1->width(); ++i )
+		{
+			pSrc1 = src1->getData() + j * src1->widthBytes() + i * nChannel;
+			pSrc2 = src2->getData() + j * src2->widthBytes() + i * nChannel;
+			pDst = dst->getData() + j * dst->widthBytes() + i * nChannel;
+
+			for( int k = 0 ; k < nChannel ; ++k )
+			{
+				*pDst = (*pSrc1) & (*pSrc2 );
+				*(pDst+1) = *(pSrc1+1) & *(pSrc2+1 );
+				*(pDst+2) = *(pSrc1+2) & *(pSrc2+2 );
+			}
+		}
+	}
+
+}
+void ImageProc::Or( BaseBuf *src1, BaseBuf *src2, BaseBuf *dst )
+{
+	if( src1->width() != src2->width() || src1->height() != src2->height() || src1->widthBytes() != src2->widthBytes() )
+		return;
+	if( src1->width() != dst->width() || src1->height() != dst->height() || src1->widthBytes() != dst->widthBytes() )
+		return;
+
+	int nChannel = src1->widthBytes()/src1->width();
+	BYTE *pSrc1 = src1->getData();
+	BYTE *pSrc2 = src2->getData();
+	BYTE *pDst = dst->getData();
+	for( int j = 0 ; j < src1->height(); ++j )
+	{
+		for( int i = 0; i < src1->width(); ++i )
+		{
+			pSrc1 = src1->getData() + j * src1->widthBytes() + i * nChannel;
+			pSrc2 = src2->getData() + j * src2->widthBytes() + i * nChannel;
+			pDst = dst->getData() + j * dst->widthBytes() + i * nChannel;
+
+			for( int k = 0 ; k < nChannel ; ++k )
+			{
+				*pDst = (*pSrc1) || (*pSrc2 );
+				*(pDst+1) = *(pSrc1+1) || *(pSrc2+1 );
+				*(pDst+2) = *(pSrc1+2) || *(pSrc2+2 );
+			}
+		}
+	}
+
+}
 void ImageProc::cvtIplImagetoBuffer( IplImage* img, BaseBuf* buf )
 {
 	
@@ -104,7 +162,10 @@ void ImageProc::cvtBuffertoIplImage( BaseBuf* buf, IplImage* img )
 		//throw error
 		return;
 
-	int nChannel = buf->widthBytes() / buf->width();
+	if( buf->width() == 0 || buf->height() == 0 || img->width == 0 || img->height == 0 )
+		return;
+
+	int nChannel = (int)(buf->widthBytes() / buf->width());
 
 	BYTE* pBuf = NULL;
 	BYTE* pImg = NULL;
@@ -297,7 +358,7 @@ void ImageProc::cvtRGB2HSV(BaseBuf* rgb, BaseBuf* hsv, Rect rect, int mode)
 			*(pDst) = v;
 			*(pDst+1) = s;
 			*(pDst+2) = h*(255.0f/360);
-
+			//CvMoments
 		}
 		
 	}
@@ -345,8 +406,10 @@ void ImageProc::rgb2hsv(int blue, int green, int red, float& val, float& sat, fl
 
 void ImageProc::getROI(BaseBuf* src, BaseBuf* dst, Rect rect)
 {
-	if(src->height() <rect.height ||src->width()<rect.width)return;
-	if(dst->height()!=rect.height||dst->width()!=rect.width)return;
+	if(src->height() <dst->height() ||src->width()<dst->width())assert("Invalid Operation: ROI is larger than the size of Source Image!");return;
+	if(dst->height()!=rect.height||dst->width()!=rect.width)assert("Invalid Operation: ROI isn't the same as the size of Destination Image!");return;
+	if(src->height() <=0 || src->width() <=0 || dst->height()<=0 || dst->width() <= 0 ) assert("Input argument false: size invalid");return;
+	
 
 	BYTE* pSrc = src->getData();
 	BYTE* pDst = dst->getData();
@@ -362,12 +425,6 @@ void ImageProc::getROI(BaseBuf* src, BaseBuf* dst, Rect rect)
 		pSrc = src->getData() + nOffset + j*nSrcWidthBytes;
 		pDst = dst->getData() + j*nDstWidthBytes;
 		memcpy(pDst, pSrc, sizeof(BYTE)*nDstWidthBytes);
-		//for(int i=0;i<nWidth;i++, pDst+=3,pSrc+=3)
-		//{
-		//	*pDst = *pSrc;
-		//	*(pDst+1) = *(pSrc+1);
-		//	*(pDst+2) = *(pSrc+2);
-		//}
 	}
 
 }

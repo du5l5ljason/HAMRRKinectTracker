@@ -183,17 +183,66 @@ KinectSkeletonOpenNI::KinectSkeletonOpenNI(Context* context, DepthGenerator* dep
 }
 
 bool KinectSkeletonOpenNI::update() {
-	XnUserID aUsers[10];
-	XnUInt16 userCount=g_UserGenerator.GetNumberOfUsers();
+XnUserID aUsers[10];
+	XnUInt16 userCount = g_UserGenerator.GetNumberOfUsers();
 	XnSkeletonJointPosition pos;	
-	XnStatus rc = g_UserGenerator.GetUsers(aUsers,userCount);
+	XnStatus rc = g_UserGenerator.GetUsers( aUsers,userCount );
+	float minDepth = 4096.0f;
+	int minDepthID = 0;
+	POINT3D avgJoint[10];
+
+	for( int i = 0; i < 10 ; ++i )
+	{
+		avgJoint[i].z = 0;
+	}
 
 	if( rc != XN_STATUS_OK)
 		return false;
 	
-	if(userCount == 1)
-		gnCurUserId = aUsers[0];
+	POINT3D allJoint3DPos[MAXJOINT][10];		// the length is equal to the length of aUsers
 
+	//cout << " Count is :" << userCount << endl;
+	for ( int userID = 0; userID < userCount ; ++userID )
+	{
+		XnPoint3D pt, pt2;
+		for( int jointID = 1 ; jointID < MAXJOINT ; jointID ++ ) 
+		{
+
+			g_UserGenerator.GetSkeletonCap().GetSkeletonJointPosition( aUsers[userID], XnSkeletonJoint(jointID), pos);	
+			pt = pos.position;
+
+			//save position info to the class
+			allJoint3DPos[userID][jointID].x = pos.position.X;
+			allJoint3DPos[userID][jointID].y = pos.position.Y;
+			allJoint3DPos[userID][jointID].z = pos.position.Z;
+
+			avgJoint[userID].z += allJoint3DPos[userID][jointID].z;
+
+			m_pDepthGen->ConvertRealWorldToProjective(1, &pt, &pt2);
+
+			avgJoint[userID].x += pt2.X;
+			avgJoint[userID].y += pt2.Y;
+		}
+
+		avgJoint[userID].x /= MAXJOINT;
+		avgJoint[userID].y /= MAXJOINT;
+		avgJoint[userID].z /= MAXJOINT;
+		
+		if( abs(avgJoint[userID].z ) < minDepth )
+		{
+			minDepth = abs(avgJoint[userID].z);
+			minDepthID = aUsers[userID];
+		}
+	}
+
+
+	//if( minDepth > 600 && avgJoint[minDepthID].x < 550 && avgJoint[minDepthID].x > 50 &&
+	//	avgJoint[minDepthID].y < 400 && avgJoint[minDepthID].y > 80 )
+	//{
+	//	gnCurUserId = minDepthID;
+	//}
+	gnCurUserId = minDepthID;
+	//cout << "gnCurUserId: %d" << gnCurUserId << endl;
 
 	if( g_UserGenerator.GetSkeletonCap().IsTracking( gnCurUserId )) 
 	{
@@ -225,6 +274,11 @@ bool KinectSkeletonOpenNI::update() {
 				gElbowPosAtMoment0.z = gElbowPosAtMoment1.z; 
 			}*/
 		}	
+	}
+	else
+	{
+		
+		return false;
 	}
 
 	return true;

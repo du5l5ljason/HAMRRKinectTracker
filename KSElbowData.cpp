@@ -6,7 +6,7 @@
 using namespace std;
 
 KinectCalibration gCalib;
-void KSElbowData::update( KinectSkeleton* skeleton, DepthGenerator* depthGen)
+bool KSElbowData::update( KinectSkeleton* skeleton, DepthGenerator* depthGen)
 {
 	POINT3D pIpSet[3],pCampSet[3];
 	//the elbow extension is related to the joints right shoulder, right elbow, right hand
@@ -45,6 +45,20 @@ void KSElbowData::update( KinectSkeleton* skeleton, DepthGenerator* depthGen)
 	//do scale transform based on the largest and smallest joint engles.
 	//cout << "The elbow extension is " << elbowExtension << endl;
 	//cout << "----------------------------------------" << endl;
+	if( !m_bIsReady )
+	{
+		if(elbowExtension > -5.0f && elbowExtension < 5.0f)
+		{
+			m_bIsReady = true;
+			return true;
+		}
+		else 
+			return false;
+	}
+	else
+	{
+		return true;
+	}
 }
 
 void KSElbowData::depthFilter( POINT3D* point1, POINT3D* point2, POINT3D* point3 )

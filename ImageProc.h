@@ -10,6 +10,8 @@
 class ImageProc
 {
 public:
+	void And( BaseBuf*, BaseBuf*, BaseBuf* );
+	void Or( BaseBuf*, BaseBuf*, BaseBuf* );	
 	void cvtIplImagetoBuffer( IplImage*, BaseBuf* );
 	void cvtBuffertoIplImage( BaseBuf*, IplImage* );
 	void loadImageFromFile( const char*, BaseBuf* );
@@ -18,6 +20,7 @@ public:
 	void cvtRGB2HSV(BaseBuf*, BaseBuf*, int);
 	void cvtRGB2HSV(BaseBuf*, BaseBuf*, Rect, int);
 	 
+
 	void rgb2hsv(int, int, int, float&, float&, float&);
 	void getROI(BaseBuf*, BaseBuf*, Rect);
 	void medianfilter(BaseBuf*, Rect, const int);

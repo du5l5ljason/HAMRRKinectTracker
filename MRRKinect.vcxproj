@@ -102,7 +102,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>OpenNI.lib;opencv_core231d.lib;opencv_highgui231d.lib;opencv_imgproc231d.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>OpenNI.lib;opencv_core231d.lib;opencv_highgui231d.lib;opencv_imgproc231d.lib;ws2_32.lib;opencv_video231.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <Midl>
       <MkTypLibCompatible>false</MkTypLibCompatible>
@@ -151,7 +151,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>OpenNI.lib;opencv_core231.lib;opencv_highgui231.lib;opencv_imgproc231.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>OpenNI.lib;opencv_core231.lib;opencv_highgui231.lib;opencv_imgproc231.lib;ws2_32.lib;opencv_video231.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <Midl>
       <MkTypLibCompatible>false</MkTypLibCompatible>
@@ -204,6 +204,8 @@
     <ClInclude Include="KinectSensorOpenNI.h" />
     <ClInclude Include="KinectSkeletonNUI.h" />
     <ClInclude Include="KSFrameDataSender.h" />
+    <ClInclude Include="KSHandTrackCamShiftTracker.h" />
+    <ClInclude Include="KSHandTrackMeanShiftTracker.h" />
     <ClInclude Include="ksUtilsFilter.h" />
     <ClInclude Include="KalmanFilter.h" />
     <ClInclude Include="ImageProc.h" />
@@ -211,7 +213,6 @@
     <ClInclude Include="DrawWnd.h" />
     <ClInclude Include="KSElbowData.h" />
     <ClInclude Include="KSHandTrackData.h" />
-    <ClInclude Include="KSHandTrackDataUsingMeanShift.h" />
     <ClInclude Include="ImgWnd.h" />
     <ClInclude Include="KinectCalibration.h" />
     <ClInclude Include="KinectSensor.h" />
@@ -241,6 +242,8 @@
     <ClCompile Include="KinectSensorOpenNI.cpp" />
     <ClCompile Include="KinectSkeletonNUI.cpp" />
     <ClCompile Include="KSFrameDataSender.cpp" />
+    <ClCompile Include="KSHandTrackCamShiftTracker.cpp" />
+    <ClCompile Include="KSHandTrackMeanShiftTracker.cpp" />
     <ClCompile Include="KSUtilsFilter.cpp" />
     <ClCompile Include="KalmanFilter.cpp" />
     <ClCompile Include="ImageProc.cpp" />
@@ -248,7 +251,6 @@
     <ClCompile Include="DrawWnd.cpp" />
     <ClCompile Include="KSElbowData.cpp" />
     <ClCompile Include="KSHandTrackData.cpp" />
-    <ClCompile Include="KSHandTrackDataUsingMeanShift.cpp" />
     <ClCompile Include="ImgWnd.cpp" />
     <ClCompile Include="KinectCalibration.cpp" />
     <ClCompile Include="KinectSensor.cpp" />

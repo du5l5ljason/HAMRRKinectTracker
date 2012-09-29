@@ -12,7 +12,7 @@ class KSElbowData
 	bool m_bIsReady;
 	//KinectCalibration* calib;
 public:
-	KSElbowData(void):elbowExtension(0.0f),m_bIsReady(false){
+	KSElbowData(void):elbowExtension(-10000.0f),m_bIsReady(false){
 		//calib = new KinectCalibration();
 	};
 	~KSElbowData(void){
@@ -23,7 +23,7 @@ public:
 	void setElbowOpening(float eo){elbowExtension = eo;};
 	bool isReady(){return m_bIsReady;};
 	void setReady(bool flag){m_bIsReady = flag;};
-	void update( KinectSkeleton*, DepthGenerator* );
+	bool update( KinectSkeleton*, DepthGenerator* );
 	void depthFilter( POINT3D*, POINT3D*, POINT3D* );
 };
 

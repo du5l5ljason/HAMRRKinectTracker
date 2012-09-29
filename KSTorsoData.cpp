@@ -5,7 +5,7 @@
 using namespace std;
 
 
-void KSTorsoData::update( BaseBuf* depthImg, KinectSkeleton* skeleton, KinectCalibration* calib, DepthGenerator* depthGen )
+bool KSTorsoData::update( BaseBuf* depthImg, KinectSkeleton* skeleton, KinectCalibration* calib, DepthGenerator* depthGen )
 {
 	//estimate torso point from the skeleton data
 	//currentPos.x = (skeleton->getJointPosAt(XN_SKEL_LEFT_SHOULDER).x + skeleton->getJointPosAt(XN_SKEL_RIGHT_SHOULDER).x)/2;
@@ -103,7 +103,25 @@ void KSTorsoData::update( BaseBuf* depthImg, KinectSkeleton* skeleton, KinectCal
 
 	shoulderRot = sign2* acos( (currentPlane.A * tcCurrentPlane.A + currentPlane.B * tcCurrentPlane.B + currentPlane.C * tcCurrentPlane.C ) / 
 		(sqrt(( tcCurrentPlane.A* tcCurrentPlane.A) + ( tcCurrentPlane.C* tcCurrentPlane.C) + ( tcCurrentPlane.B* tcCurrentPlane.B) ) * sqrt(( currentPlane.A* currentPlane.A) + ( currentPlane.C* currentPlane.C) + ( currentPlane.B* currentPlane.B) ) )) * 180/PI;
-	cout << "The Shoulder Rotation is " << shoulderRot << endl;
+
+	if( !m_bIsReady )
+	{
+		if( shoulderRot >= -180.0f && shoulderRot <= 180.0f )
+		{	
+			m_bIsReady = true;
+			return true;
+		}
+		else
+			return false;
+	}
+	else
+	{
+		if( shoulderRot < -180.0f || shoulderRot > 180.0f)
+			return false;
+
+		return true;
+	}
+
 
 }
 

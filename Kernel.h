@@ -30,18 +30,18 @@ public:
 	calcKernel(w/2, h/2);
 	}
 	~Kernel(void){
-		//if(m_pKlArr!=NULL)
-		//{
+		if(m_pKlArr)
+		{
 		//	for(int i=0;i<m_width;++i)	
 		//		delete[] m_pKlArr[i];
 		//	delete[] m_pKlArr;		
-		//}
-		//if(m_pKlGradArr!=NULL)
-		//{
+		}
+		if(m_pKlGradArr)
+		{
 		//	for(int i=0;i<m_width;++i)	
 		//		delete[] m_pKlGradArr[i];
 		//	delete[] m_pKlGradArr;		
-		//}
+		}
 	};
 };	
 

@@ -8,8 +8,8 @@ using namespace xn;
 #define _RECORDVIDEO_WIDTH 640
 #define _RECORDVIDEO_HEIGHT 480
 
-#define MODEL_W 30		//hx	Width of the model
-#define MODEL_H 30		//hy	Height of the model
+#define MODEL_W 26		//hx	Width of the model
+#define MODEL_H 26		//hy	Height of the model
 
 
 #define _ELBOWTHRESH 1000
@@ -23,8 +23,8 @@ using namespace xn;
 
 #define ROI_SIZE_W 100
 #define ROI_SIZE_H 100
-#define MODEL_StartX 400
-#define MODEL_StartY 250
+#define MODEL_StartX 405
+#define MODEL_StartY 280
 
 
 

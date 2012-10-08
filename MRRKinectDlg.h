@@ -26,6 +26,7 @@
 #include "KSFrameData.h"
 #include "KSArchivingData.h"
 #include "KSFrameDataSender.h"
+#include "KSFrameDataReceiver.h"
 
 //For test
 #include "ColorModel.h"
@@ -83,19 +84,19 @@ public:
 public:
 	CMRRKinectDlg(CWnd* pParent = NULL);	// standard constructor
 	~CMRRKinectDlg(void){
-		//if(m_wndFull!=NULL)delete m_wndFull;
-		//if(m_pSkeleton!=NULL)delete m_pSkeleton;
-		//if(m_pTracker!=NULL)delete m_pTracker;
-		//if(m_pBG!=NULL)delete m_pBG;
+		if(m_wndFull)delete m_wndFull;
+		if(m_pSkeleton)delete m_pSkeleton;
+		if(m_pTracker)delete m_pTracker;
+		if(m_pBG)delete m_pBG;
 		//if(m_pFilter!=NULL)delete m_pFilter;
-		//if(m_pVideoRecorder!=NULL)delete m_pVideoRecorder;
-		//if(m_pImgProc!=NULL)delete m_pImgProc;
-		//if(m_pModel!=NULL)delete m_pModel;
-		//if(m_pCalib!=NULL)delete m_pCalib;
-		//if(m_pTorsoData!=NULL)delete m_pTorsoData;
-		//if(m_pElbowData!=NULL)delete m_pElbowData;
-		//if(m_pFrameData!=NULL)delete m_pFrameData;
-		//if(m_pArchivingData!=NULL)delete m_pArchivingData;
+		if(m_pVideoRecorder)delete m_pVideoRecorder;
+		if(m_pImgProc)delete m_pImgProc;
+		if(m_pModel)delete m_pModel;
+		if(m_pCalib)delete m_pCalib;
+		if(m_pTorsoData)delete m_pTorsoData;
+		if(m_pElbowData)delete m_pElbowData;
+		if(m_pFrameData)delete m_pFrameData;
+		if(m_pArchivingData)delete m_pArchivingData;
 	}
 // Dialog Data
 	enum { IDD = IDD_MRRKINECT_DIALOG };

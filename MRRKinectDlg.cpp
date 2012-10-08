@@ -24,8 +24,8 @@ using namespace std;
 
 bool g_RunKinect = true;
 HANDLE g_hKinectThread;
-int gnSystemStatus = _SS_TRACK;
-int gCalibStatus = 0;
+int gnSystemStatus = _SS_CALIB;
+int gCalibStatus = 1;
 POINT3D gpMarkerSet[3];
 int gMarkerCount = 0;
 int gDataStreamStatus = _DS_CLOSE;
@@ -305,6 +305,7 @@ DWORD WINAPI ShowStreams(LPVOID lpParam) {
 					{
 						fullWnd->showSkeleton(dlg->getSkeleton()->getJointPos());
 					}
+					
 
 					Rect modRect;
 					modRect.x = MODEL_StartX - (int)(MODEL_W/2);
@@ -312,13 +313,13 @@ DWORD WINAPI ShowStreams(LPVOID lpParam) {
 					modRect.width = MODEL_W;
 					modRect.height = MODEL_H;
 					fullWnd->showRect( modRect );
-
-					Rect curRect;
-					curRect.width = dlg->getTracker()->getPrevRect().width;
-					curRect.height = dlg->getTracker()->getPrevRect().height;
-					curRect.x = dlg->getTracker()->getPrevRect().x;
-					curRect.y = dlg->getTracker()->getPrevRect().y;
-					fullWnd->showRect( curRect );
+					//
+					///*Rect curRect;
+					//curRect.width = dlg->getTracker()->getPrevRect().width;
+					//curRect.height = dlg->getTracker()->getPrevRect().height;
+					//curRect.x = dlg->getTracker()->getPrevRect().x;
+					//curRect.y = dlg->getTracker()->getPrevRect().y;*/
+					fullWnd->showHandJoint( dlg->getTracker()->getHandPos() );
 					fullWnd->Invalidate();
 				break;
 			case 0: fullWnd->Invalidate();break;
@@ -356,9 +357,13 @@ DWORD WINAPI KinectThread(LPVOID lpParam) {
 	double currentFrameTime = 0.0f;
 	int frameID = 0;
 	KSFrameDataSender sender;
-
+	//Tingfang 10/05
+	KSFrameDataReceiver receiver;
 
 	sender.openServer();
+	//Tingfang 10/05
+	receiver.openServer();
+	//end
 	while(g_RunKinect) {
 
 		lastFrameTime = currentFrameTime;
@@ -418,7 +423,8 @@ DWORD WINAPI KinectThread(LPVOID lpParam) {
 							if( !(isTorsoUpdated && isElbowUpdated ) )
 								gDataStreamStatus = _DS_CLOSE;
 						}
-						
+						POINT3D handPos3D = calib->cvtIPtoGP(handData->getHandPos(),kinect->getDepthGenerator());
+						cout << "hand Position:" << handPos3D.x << ", " << handPos3D.y << ", " << handPos3D.z << endl;
 						//cout << "dataStreamStatus: " << gDataStreamStatus << endl;
 						
 			/*			if(gDataStreamStatus == _DS_OPEN)
@@ -439,7 +445,10 @@ DWORD WINAPI KinectThread(LPVOID lpParam) {
 								skeleton->getJoint3DPosAt(XN_SKEL_TORSO).z,
 								torsoData->getTorsoComps(),
 								torsoData->getShoulderRot(),
-								elbowData->getElbowOpening()
+								elbowData->getElbowOpening(),
+								handPos3D.x,
+								handPos3D.y,
+								handPos3D.z
 								);																				//if tracking is success, we record the data, frame data updates.
 
 							sender.getData()->update(
@@ -456,7 +465,10 @@ DWORD WINAPI KinectThread(LPVOID lpParam) {
 								frameData->getTorsoZ(),
 								frameData->getTorsoComp(),
 								frameData->getShoulderRot(),
-								frameData->getElbowOpen()
+								frameData->getElbowOpen(),
+								frameData->getHandX(),
+								frameData->getHandY(),
+								frameData->getHandZ()
 								);
 
 							//cout << "The left shoulder pos is : " << frameData->getLShoulderX ()<< ", " << frameData->getLShoulderY() << ", " << frameData->getLShoulderZ() << endl; 
@@ -472,11 +484,11 @@ DWORD WINAPI KinectThread(LPVOID lpParam) {
 						//------------
 						CString str;
 						//str.Format(_T("%lf"), dlg->getTorsoData()->getTorsoComps());
-						dlg->SetDlgItemText(IDC_EDIT12, str);
-						str.Format(_T("%lf"), dlg->getElbowData()->getElbowOpening());
-						dlg->SetDlgItemText(IDC_EDIT13, str);
-						str.Format(_T("%lf"), dlg->getTorsoData()->getShoulderRot());
-						dlg->SetDlgItemText(IDC_EDIT14, str);
+						//dlg->SetDlgItemText(IDC_EDIT12, str);
+						//str.Format(_T("%lf"), dlg->getElbowData()->getElbowOpening());
+						//dlg->SetDlgItemText(IDC_EDIT13, str);
+						//str.Format(_T("%lf"), dlg->getTorsoData()->getShoulderRot());
+						//dlg->SetDlgItemText(IDC_EDIT14, str);
 					}
 
 					break;

@@ -50,19 +50,6 @@ void CDrawWnd::showSkeleton(POINT3D* jointPos)
 		showLine(jointPos[id1].x, jointPos[id1].y, jointPos[id2].x, jointPos[id2].y, bluecolor);
 	}
 	
-	int jointKey[3] = {
-		XN_SKEL_HEAD,
-		XN_SKEL_RIGHT_HAND,
-		XN_SKEL_LEFT_HAND
-	};
-
-	int size1 = 40;
-	int size2 = 5;
-
-	//showEllipse(jointPos[jointKey[0]].x-size1, jointPos[jointKey[0]].y-size1,jointPos[jointKey[0]].x+size1, jointPos[jointKey[0]].y+size1, bluecolor);
-	//showEllipse(jointPos[jointKey[1]].x-size2, jointPos[jointKey[1]].y-size2,jointPos[jointKey[1]].x+size2, jointPos[jointKey[1]].y+size2, redcolor);
-	//showEllipse(jointPos[jointKey[2]].x-size2, jointPos[jointKey[2]].y-size2,jointPos[jointKey[2]].x+size2, jointPos[jointKey[2]].y+size2, redcolor);
-
 }
 
 void CDrawWnd::showRect(Rect rect)
@@ -81,8 +68,8 @@ void CDrawWnd::showHandJoint(POINT3D RightPos)
 	int bluecolor[] = {0, 0, 255};
 	int greencolor[] = {0, 255, 0};
 
-	showLine(RightPos.x-size, RightPos.y, RightPos.x+size, RightPos.y, redcolor);
-	showLine(RightPos.x, RightPos.y-size, RightPos.x, RightPos.y+size, redcolor);
+	showLine(RightPos.x-size, RightPos.y, RightPos.x+size, RightPos.y, greencolor);
+	showLine(RightPos.x, RightPos.y-size, RightPos.x, RightPos.y+size, greencolor);
 	//showEllipse(RightPos.x-size, RightPos.y-size, RightPos.x+size, RightPos.y+size, redcolor);
 	//showEllipse(jointPos[jointKey[2]].x-size2, jointPos[jointKey[2]].y-size2,jointPos[jointKey[2]].x+size2, jointPos[jointKey[2]].y+size2, redcolor);
 }

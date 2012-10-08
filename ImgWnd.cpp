@@ -124,15 +124,15 @@ void CImgWnd::ShowDownSampleImg8(int width, int height, int widthstep, BYTE* pDa
 }
 
 void CImgWnd::showLine(int x1, int y1, int x2, int y2, int color[]) {
-	CPen newpen, *pOldpen;
+	CPen newpen;
 	newpen.CreatePen( PS_SOLID, 3, RGB(color[0],color[1],color[2])  );
-	pOldpen = m_dibShow.SelectObject( &newpen);
+	CPen *pOldpen = m_dibShow.SelectObject( &newpen);
 
 	m_dibShow.MoveTo( x1, y1 );
 	m_dibShow.LineTo( x2, y2 );
 	
 	m_dibShow.SelectObject( pOldpen );
-	newpen.DeleteObject();
+	newpen.DeleteObject();					//memory leak
 }
 
 void CImgWnd::showEllipse(int x1, int y1, int x2, int y2, int color[]) {

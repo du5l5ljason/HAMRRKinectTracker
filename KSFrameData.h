@@ -13,9 +13,9 @@ class KSFrameData
 	float torsoX;
 	float torsoY;
 	float torsoZ;
-	//float handX;
-	//float handY;
-	//float handZ;
+	float handX;
+	float handY;
+	float handZ;
 	float torsoComp;		//-180-180 degree
 	float shoulderRot;		//-180-180 degree
 	float elbowOpen;        //0-180 degree
@@ -37,9 +37,9 @@ public:
 	float getTorsoComp(){return torsoComp;};
 	float getShoulderRot(){return shoulderRot;};
 	float getElbowOpen(){return elbowOpen;};
-	//float getHandX(){return handX;};
-	//float getHandY(){return handY;};
-	//float getHandZ(){return handZ;};
+	float getHandX(){return handX;};
+	float getHandY(){return handY;};
+	float getHandZ(){return handZ;};
 	void setFrameID(int id){frameID = id;};
 	void setTimestamp(double t){timestamp = t;};
 	void setLShoulder(float x, float y, float z){ lShoulderX = x;lShoulderY = y;lShoulderZ = z;};
@@ -48,8 +48,8 @@ public:
 	void setTorsoComp(float tc){torsoComp = tc;};
 	void setShoulderRot(float sr){shoulderRot = sr;};
 	void setElbowOpen(float eo){elbowOpen = eo;};
-	//void setHand(float x, float y, float z){ handX = x; handY = y; handZ = z;};
-	void update(int id, double t, float x1, float y1, float z1, float x2, float y2, float z2, float x3, float y3, float z3, float tc, float sr, float eo/* float hx, float hy, float hz*/){
+	void setHand(float x, float y, float z){ handX = x; handY = y; handZ = z;};
+	void update(int id, double t, float x1, float y1, float z1, float x2, float y2, float z2, float x3, float y3, float z3, float tc, float sr, float eo, float hx, float hy, float hz){
 			frameID = id;
 			timestamp = t;
 			lShoulderX = x1;
@@ -64,9 +64,9 @@ public:
 			torsoComp = tc;
 			shoulderRot = sr;
 			elbowOpen = eo;
-			//handX = hx;
-			//handY = hy;
-			//handZ = hz;
+			handX = hx;
+			handY = hy;
+			handZ = hz;
 	};
 };
 

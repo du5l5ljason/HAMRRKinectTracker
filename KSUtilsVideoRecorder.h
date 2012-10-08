@@ -17,7 +17,9 @@ public:
 	~KSUtilsVideoRecorder(void){
 		if( m_bIsRun != false) m_bIsRun = false;
 		if( m_bIsInit != false) m_bIsInit = false;
-		cvReleaseVideoWriter( &m_pVideoWriter );};
+		//if(m_pVideoWriter)
+			//cvReleaseVideoWriter( &m_pVideoWriter );
+	};
 
 public:
 	bool isRun(){return m_bIsRun;};

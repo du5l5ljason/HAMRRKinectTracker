@@ -42,7 +42,9 @@ void KSHandTrackMeanshiftTracker::init(BaseBuf* imgSrc, Rect &ROI)
 	m_prevRect.y = startPoint.y - ROI.height/2;
 	m_prevRect.height = ROI_SIZE_H;
 	m_prevRect.width = ROI_SIZE_W;
+
 }
+
 bool KSHandTrackMeanshiftTracker::track(BaseBuf* imgSrc, BaseBuf* depth, Rect &ROI)
 {
 
@@ -65,7 +67,6 @@ bool KSHandTrackMeanshiftTracker::track(BaseBuf* imgSrc, BaseBuf* depth, Rect &R
 	m_pKF->predict();
 	
 	//Use meanshift to find the measure value Zk.
-	m_pKernel = new Kernel(xDim, yDim);
 	m_Weight = new double*[xDim];
 	for( int i=0;i<xDim;++i)
 		m_Weight[i] = new double[yDim];
@@ -98,6 +99,10 @@ bool KSHandTrackMeanshiftTracker::track(BaseBuf* imgSrc, BaseBuf* depth, Rect &R
 		ROI.y = 0;
 		ROI.width = imgSrc->width();
 		ROI.height = imgSrc->height();
+
+		for( int i=0;i<xDim;++i)
+			delete [] m_Weight[i];
+		delete [] m_Weight;
 		return false;
 	}
 	
@@ -121,7 +126,6 @@ bool KSHandTrackMeanshiftTracker::track(BaseBuf* imgSrc, BaseBuf* depth, Rect &R
 
 	//if(getBhaDistance()>0.8)
 	exit = false;
-	delete m_pKernel;
 	for( int i=0;i<xDim;++i)
 		delete [] m_Weight[i];
 	delete [] m_Weight;

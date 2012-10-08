@@ -203,6 +203,7 @@
     <ClInclude Include="Kernel.h" />
     <ClInclude Include="KinectSensorOpenNI.h" />
     <ClInclude Include="KinectSkeletonNUI.h" />
+    <ClInclude Include="KSFrameDataReceiver.h" />
     <ClInclude Include="KSFrameDataSender.h" />
     <ClInclude Include="KSHandTrackCamShiftTracker.h" />
     <ClInclude Include="KSHandTrackMeanShiftTracker.h" />
@@ -241,6 +242,7 @@
     <ClCompile Include="Kernel.cpp" />
     <ClCompile Include="KinectSensorOpenNI.cpp" />
     <ClCompile Include="KinectSkeletonNUI.cpp" />
+    <ClCompile Include="KSFrameDataReceiver.cpp" />
     <ClCompile Include="KSFrameDataSender.cpp" />
     <ClCompile Include="KSHandTrackCamShiftTracker.cpp" />
     <ClCompile Include="KSHandTrackMeanShiftTracker.cpp" />

@@ -57,7 +57,7 @@ void ColorModel::updateModel(BaseBuf* imgHSV, int cx, int cy, int half_x, int ha
 			bins[i] = new unsigned int[m_nYDim];
 		binsInit = true;
 	}
-	BYTE* pImg = new BYTE;
+	BYTE* pImg = imgHSV->getData();
 	unsigned char Hval;
 	unsigned char Vval;
 
@@ -98,8 +98,7 @@ void ColorModel::updateModel(BaseBuf* imgHSV, int cx, int cy, int half_x, int ha
 	{
 		m_Model[i] /= total;
 	}
-	//if(pImg!=NULL)
-	//	delete pImg;
+
 }
 
 unsigned int ColorModel::theBin(unsigned int x, unsigned int y)

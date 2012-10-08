@@ -40,7 +40,10 @@ bool KSElbowData::update( KinectSkeleton* skeleton, DepthGenerator* depthGen)
 	dist12 = gCalib.calcDist( tempPos[1], tempPos[2] );
 	dist02 = gCalib.calcDist( tempPos[0], tempPos[2] );
 
-	elbowExtension = acos ((dist01*dist01 - dist02*dist02 - dist12*dist12)/(2* dist02 * dist12 ))*180/PI  ;
+	if (dist02 == 0 && dist12 == 0 )
+		elbowExtension = 180.0f;
+	else
+		elbowExtension = acos ((dist01*dist01 - dist02*dist02 - dist12*dist12)/(2* dist02 * dist12 ))*180/PI  ;
 	//elbowExtension = 0.5f;
 	//do scale transform based on the largest and smallest joint engles.
 	//cout << "The elbow extension is " << elbowExtension << endl;

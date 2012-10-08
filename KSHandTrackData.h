@@ -64,7 +64,7 @@ public:
 		m_prevRect.x = 0;
 		m_prevRect.y = 0;
 		m_prevRect.height = height;
-		m_prevRect.width = height;
+		m_prevRect.width = width;
 	}
 	~KSHandTrackData(void){
 		if(m_pBG!=NULL)

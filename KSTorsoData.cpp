@@ -68,8 +68,10 @@ bool KSTorsoData::update( BaseBuf* depthImg, KinectSkeleton* skeleton, KinectCal
 	float distBTShoulderPosAndRestTorsoPos = 2*sqrt ( ( centerRestShoulderPos.x - restTorsoPos.x ) * ( centerRestShoulderPos.x - restTorsoPos.x ) +
 													( centerRestShoulderPos.y - restTorsoPos.y ) * ( centerRestShoulderPos.y - restTorsoPos.y ) +
 													( centerRestShoulderPos.z - restTorsoPos.z ) * ( centerRestShoulderPos.z - restTorsoPos.z ) );
-
-	torsoComps = sign * atan ( distBTShoulderPosAndTorsoPlane/distBTShoulderPosAndRestTorsoPos )*180/PI  ;
+	if( distBTShoulderPosAndRestTorsoPos == 0 )
+		torsoComps = 180.0f;
+	else
+		torsoComps = sign * atan ( distBTShoulderPosAndTorsoPlane/distBTShoulderPosAndRestTorsoPos )*180/PI  ;
 	//cout << "The Torso Comp is " << torsoComps << endl;
 
 	//Calculate Shoulder Rotation Angle
@@ -101,8 +103,13 @@ bool KSTorsoData::update( BaseBuf* depthImg, KinectSkeleton* skeleton, KinectCal
 											currentTorsoPos
 										);
 
-	shoulderRot = sign2* acos( (currentPlane.A * tcCurrentPlane.A + currentPlane.B * tcCurrentPlane.B + currentPlane.C * tcCurrentPlane.C ) / 
+	if( tcCurrentPlane.A == 0 && tcCurrentPlane.B == 0 && tcCurrentPlane.C == 0 )
+		shoulderRot = 180.0f;
+	else
+	{
+		shoulderRot = sign2* acos( (currentPlane.A * tcCurrentPlane.A + currentPlane.B * tcCurrentPlane.B + currentPlane.C * tcCurrentPlane.C ) / 
 		(sqrt(( tcCurrentPlane.A* tcCurrentPlane.A) + ( tcCurrentPlane.C* tcCurrentPlane.C) + ( tcCurrentPlane.B* tcCurrentPlane.B) ) * sqrt(( currentPlane.A* currentPlane.A) + ( currentPlane.C* currentPlane.C) + ( currentPlane.B* currentPlane.B) ) )) * 180/PI;
+	}
 
 	if( !m_bIsReady )
 	{
@@ -140,7 +147,6 @@ Plane3D KSTorsoData::calcPlaneFrom3Points(POINT3D p1, POINT3D p2, POINT3D p3)
 						pt1.y * ( (pt2.x - pt1.x) * (pt3.z - pt1.z) - (pt2.z - pt1.z) * (pt3.x - pt1.x) ) + 
 						pt1.z * ( (pt2.y - pt1.y) * (pt3.x - pt1.x) - (pt2.x - pt1.x) * (pt3.y - pt1.y) );
 
-	if( plane.A == 0 && plane.B == 0 && plane.C == 0 )
-		cout << "Please Calibrate again!" << endl; // error
+
 	return plane;
 }

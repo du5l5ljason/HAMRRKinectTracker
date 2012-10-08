@@ -169,6 +169,9 @@
     <ClInclude Include="KSHandTrackMeanShiftTracker.h">
       <Filter>Header Files\Algorithm</Filter>
     </ClInclude>
+    <ClInclude Include="KSFrameDataReceiver.h">
+      <Filter>Header Files\Data</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="MRRKinect.cpp">
@@ -263,6 +266,9 @@
     </ClCompile>
     <ClCompile Include="KSHandTrackMeanShiftTracker.cpp">
       <Filter>Source Files\Algorithm</Filter>
+    </ClCompile>
+    <ClCompile Include="KSFrameDataReceiver.cpp">
+      <Filter>Source Files\Data</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

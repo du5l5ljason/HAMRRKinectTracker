@@ -15,8 +15,8 @@ public:
 
 	OSFrameData* getData(){return &m_ReceiverData;};//Should be a data class from Optitrak
 	void setData( OSFrameData data ){ m_ReceiverData = data;};//Should be a data class from Optitrak
-	void openServer();
-	void closeServer();
+	void openClient();
+	void closeClient();
 	void receiveData();
 };
 

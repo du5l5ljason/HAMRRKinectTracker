@@ -3,7 +3,7 @@
 //
 
 #include "stdafx.h"
-#include "vld.h"
+//#include "vld.h"
 #include "MRRKinect.h"
 #include "MRRKinectDlg.h"
 

@@ -363,7 +363,7 @@ DWORD WINAPI KinectThread(LPVOID lpParam) {
 
 	sender.openServer();
 	//Tingfang 10/05
-	receiver.openServer();
+	receiver.openClient();
 	//end
 	while(g_RunKinect) {
 
@@ -488,7 +488,6 @@ DWORD WINAPI KinectThread(LPVOID lpParam) {
 							frameData->getStatus()
 							);
 						
-						//receiver.getData()->update( osFrameData->getState() );
 
 						sender.sendData();
 						//receiver.receiveData();
@@ -526,6 +525,7 @@ DWORD WINAPI KinectThread(LPVOID lpParam) {
 
 	}
 	sender.closeServer();
+	receiver.closeClient();
 	return 0;
 }
 

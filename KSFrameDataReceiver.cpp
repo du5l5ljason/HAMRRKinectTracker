@@ -12,12 +12,12 @@ KSFrameDataReceiver::~KSFrameDataReceiver(void)
 {
 }
 
-void KSFrameDataReceiver::openServer()
+void KSFrameDataReceiver::openClient()
 {
-	m_Client.open( DASHSERVER, KINECTSERVERPORT );
+	m_Client.open( DASHSERVER, DASHSERVERPORT );
 }
 
-void KSFrameDataReceiver::closeServer()
+void KSFrameDataReceiver::closeClient()
 {
 	m_Client.close();
 }

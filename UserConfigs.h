@@ -68,10 +68,10 @@ enum DATASTREAMSTATUS{
 
 #define _BGPATH "D:\\My Documents\\MRRKinectTracking Images\\BG\\"
 #define _SAMPLE_XML_PATH "C:\\Program Files (x86)\\OpenNI\\Data\\SamplesConfig.xml"
-#define _DATA_ARCHIVEFILE_PATH "C:\\Users\\Home System\\My Documents\\KinectArchive\\ArchiveData\\"
-#define _CALIB_FILE_PATH "C:\\Users\\Home System\\My Documents\\KinectArchive\\CalibrationData\\"
+#define _DATA_ARCHIVEFILE_PATH "C:\\Users\\HAMRR\\My Documents\\KinectArchive\\ArchiveData\\"
+#define _CALIB_FILE_PATH "C:\\Users\\HAMRR\\My Documents\\KinectArchive\\CalibrationData\\"
 #define _MODEL_FILE_PATH "C:\\Model.bmp"
-#define _VIDEO_RECORD_FILE_PATH "C:\\Users\\Home System\\My Documents\\KinectArchive\\HAMRR VideoClips\\"
+#define _VIDEO_RECORD_FILE_PATH "C:\\Users\\HAMRR\\My Documents\\KinectArchive\\HAMRR VideoClips\\"
 
 #define KINECTSERVER "239.110.1.2"
 #define KINECTSERVERPORT 1901     //physical reaching another port at 1502

@@ -4,7 +4,7 @@
 //Tingfang Created 10/05,2012
 KSFrameDataReceiver::KSFrameDataReceiver(void)
 {
-	memset( &m_ReceiverData, 0, sizeof( KSFrameData ) );
+	memset( &m_ReceiverData, 0, sizeof( OSFrameData ) );
 }
 
 
@@ -14,7 +14,7 @@ KSFrameDataReceiver::~KSFrameDataReceiver(void)
 
 void KSFrameDataReceiver::openServer()
 {
-	m_Client.open( KINECTSERVER, KINECTSERVERPORT );
+	m_Client.open( DASHSERVER, KINECTSERVERPORT );
 }
 
 void KSFrameDataReceiver::closeServer()
@@ -29,9 +29,8 @@ void KSFrameDataReceiver::receiveData()
 
 	if( n> 0 )
 	{
-		int id = m_Client.unpackInt();
-		double time = m_Client.unpackDouble();
+		int dashState = m_Client.unpackInt();			
 		//receive data from Optitrak.
-
+		m_ReceiverData.setState( dashState );
 	}
 }

@@ -61,8 +61,9 @@ enum SYMSTATUS{
 
 enum DATASTREAMSTATUS{
 	_DS_CLOSE,
+	_DS_WAITFORPOSE,
 	_DS_READY,
-	_DS_OPEN,
+	_DS_TRACK,
 };
 
 #define _BGPATH "D:\\My Documents\\MRRKinectTracking Images\\BG\\"
@@ -71,3 +72,9 @@ enum DATASTREAMSTATUS{
 #define _CALIB_FILE_PATH "C:\\Users\\Home System\\My Documents\\KinectArchive\\CalibrationData\\"
 #define _MODEL_FILE_PATH "C:\\Model.bmp"
 #define _VIDEO_RECORD_FILE_PATH "C:\\Users\\Home System\\My Documents\\KinectArchive\\HAMRR VideoClips\\"
+
+#define KINECTSERVER "239.110.1.2"
+#define KINECTSERVERPORT 1901     //physical reaching another port at 1502
+
+#define DASHSERVER "239.1.1.2"
+#define DASHSERVERPORT 1904

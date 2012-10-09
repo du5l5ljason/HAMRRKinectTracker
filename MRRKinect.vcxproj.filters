@@ -100,9 +100,6 @@
     <ClInclude Include="KSHandTrackData.h">
       <Filter>Header Files\Data</Filter>
     </ClInclude>
-    <ClInclude Include="KSTorsoData.h">
-      <Filter>Header Files\Data</Filter>
-    </ClInclude>
     <ClInclude Include="DrawWnd.h">
       <Filter>Header Files\View</Filter>
     </ClInclude>
@@ -170,6 +167,12 @@
       <Filter>Header Files\Algorithm</Filter>
     </ClInclude>
     <ClInclude Include="KSFrameDataReceiver.h">
+      <Filter>Header Files\Data</Filter>
+    </ClInclude>
+    <ClInclude Include="KSTorsoData.h">
+      <Filter>Header Files\Data</Filter>
+    </ClInclude>
+    <ClInclude Include="OSFrameData.h">
       <Filter>Header Files\Data</Filter>
     </ClInclude>
   </ItemGroup>
@@ -268,6 +271,9 @@
       <Filter>Source Files\Algorithm</Filter>
     </ClCompile>
     <ClCompile Include="KSFrameDataReceiver.cpp">
+      <Filter>Source Files\Data</Filter>
+    </ClCompile>
+    <ClCompile Include="OSFrameData.cpp">
       <Filter>Source Files\Data</Filter>
     </ClCompile>
   </ItemGroup>

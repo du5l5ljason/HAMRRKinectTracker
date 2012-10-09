@@ -44,5 +44,3 @@ typedef struct Queue
 }Queue;
 
 //define address and port
-#define KINECTSERVER "239.110.1.2"
-#define KINECTSERVERPORT 1901     //physical reaching another port at 1502

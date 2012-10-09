@@ -2,7 +2,7 @@
 
 #include "MulticastServer.h"
 #include "KSFrameData.h"
-#include "UserTypes.h"
+#include "UserConfigs.h"
 
 class KSFrameDataSender
 {

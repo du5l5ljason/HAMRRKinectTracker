@@ -349,6 +349,7 @@ DWORD WINAPI KinectThread(LPVOID lpParam) {
 	KSHandTrackData* handData = dlg->getTracker();
 	KSTorsoData* torsoData = dlg->getTorsoData();
 	KSFrameData* frameData = dlg->getFrameData();
+	OSFrameData* osFrameData = dlg->getOSFrameData();
 	KSElbowData* elbowData = dlg->getElbowData();
 	KSArchivingData* archiveData = dlg->getArchivingData();
 	
@@ -370,12 +371,27 @@ DWORD WINAPI KinectThread(LPVOID lpParam) {
 		frameID = frameID + 1;
 
 		kinect->update();
+		gIsSkeletonUpdated = skeleton->update();
+		if( gIsSkeletonUpdated )
+		{
+			gnSystemStatus = _SS_TRACK;
+			if(gDataStreamStatus == _DS_CLOSE)
+				gDataStreamStatus = _DS_WAITFORPOSE ;
+		}
+		else
+		{
+			gnSystemStatus = _SS_CALIB;
+			if(gDataStreamStatus > _DS_CLOSE )
+				gDataStreamStatus = _DS_CLOSE;
+		}
+
+
+		cout << "System status: " << gnSystemStatus << endl;
 
 		switch( gnSystemStatus ){
 			case _SS_REST: break;
 			case _SS_CALIB:
 				{
-
 					switch( gCalibStatus ){
 						case 0:
 							if( isMarkerInit() )
@@ -394,88 +410,89 @@ DWORD WINAPI KinectThread(LPVOID lpParam) {
 				}
 			case _SS_TRACK:	
 				{
-					gIsSkeletonUpdated = skeleton->update();
-					if( gIsSkeletonUpdated && handData->isReady() && torsoData->isReady()&&elbowData->isReady() )
+
+					if( gIsSkeletonUpdated )
 					{
 
 						//------------
 						//UPDATE DATA
 						//------------
 						//1. handData 2. torsoData 3. elbowData 
-						  handData->update(            
-							kinect->getRGBImg(),
-							kinect->getDepthImg(),
-							handData->getHandPos().x,
-							handData->getHandPos().y,
-							handData->getPrevRect().width,                                    //4.12 Can we change the ROI size depending on the tracking performance? if tracking lost, 
-							handData->getPrevRect().height 
-							);
+						 // handData->update(            
+							//kinect->getRGBImg(),
+							//kinect->getDepthImg(),
+							//handData->getHandPos().x,
+							//handData->getHandPos().y,
+							//handData->getPrevRect().width,                                    //4.12 Can we change the ROI size depending on the tracking performance? if tracking lost, 
+							//handData->getPrevRect().height 
+							//);
  
 
 						bool isTorsoUpdated =torsoData->update( kinect->getDepthImg(), skeleton, calib, kinect->getDepthGenerator() );
 						bool isElbowUpdated =elbowData->update( skeleton, kinect->getDepthGenerator());
 
 						//cout << isTorsoUpdated << ",  " << isElbowUpdated << endl;
-						if( gDataStreamStatus == _DS_CLOSE || gDataStreamStatus == _DS_READY)
-							gDataStreamStatus = isTorsoUpdated && isElbowUpdated;
-						else if( gDataStreamStatus == _DS_OPEN )
+						if( isTorsoUpdated && isElbowUpdated && gDataStreamStatus == _DS_WAITFORPOSE)
 						{
-							if( !(isTorsoUpdated && isElbowUpdated ) )
-								gDataStreamStatus = _DS_CLOSE;
+							gDataStreamStatus = _DS_READY;
 						}
+
+
 						POINT3D handPos3D = calib->cvtIPtoGP(handData->getHandPos(),kinect->getDepthGenerator());
-						cout << "hand Position:" << handPos3D.x << ", " << handPos3D.y << ", " << handPos3D.z << endl;
-						//cout << "dataStreamStatus: " << gDataStreamStatus << endl;
+						//cout << "hand Position:" << handPos3D.x << ", " << handPos3D.y << ", " << handPos3D.z << endl;
+						cout << "dataStreamStatus: " << gDataStreamStatus << endl;
 						
-			/*			if(gDataStreamStatus == _DS_OPEN)
-						{*/
-							getTimeofDay(&timeStamp, NULL);
-							currentFrameTime = timeStamp.tv_sec + (timeStamp.tv_usec/1000000.0);						
+
+						getTimeofDay(&timeStamp, NULL);
+						currentFrameTime = timeStamp.tv_sec + (timeStamp.tv_usec/1000000.0);						
 						
-							frameData->update(frameID, 
-								currentFrameTime,
-								skeleton->getJoint3DPosAt(XN_SKEL_LEFT_SHOULDER).x,
-								skeleton->getJoint3DPosAt(XN_SKEL_LEFT_SHOULDER).y,
-								skeleton->getJoint3DPosAt(XN_SKEL_LEFT_SHOULDER).z,
-								skeleton->getJoint3DPosAt(XN_SKEL_RIGHT_SHOULDER).x,
-								skeleton->getJoint3DPosAt(XN_SKEL_RIGHT_SHOULDER).y,
-								skeleton->getJoint3DPosAt(XN_SKEL_RIGHT_SHOULDER).z,
-								skeleton->getJoint3DPosAt(XN_SKEL_TORSO).x,
-								skeleton->getJoint3DPosAt(XN_SKEL_TORSO).y,
-								skeleton->getJoint3DPosAt(XN_SKEL_TORSO).z,
-								torsoData->getTorsoComps(),
-								torsoData->getShoulderRot(),
-								elbowData->getElbowOpening(),
-								handPos3D.x,
-								handPos3D.y,
-								handPos3D.z
-								);																				//if tracking is success, we record the data, frame data updates.
+						frameData->update(frameID, 
+							currentFrameTime,
+							skeleton->getJoint3DPosAt(XN_SKEL_LEFT_SHOULDER).x,
+							skeleton->getJoint3DPosAt(XN_SKEL_LEFT_SHOULDER).y,
+							skeleton->getJoint3DPosAt(XN_SKEL_LEFT_SHOULDER).z,
+							skeleton->getJoint3DPosAt(XN_SKEL_RIGHT_SHOULDER).x,
+							skeleton->getJoint3DPosAt(XN_SKEL_RIGHT_SHOULDER).y,
+							skeleton->getJoint3DPosAt(XN_SKEL_RIGHT_SHOULDER).z,
+							skeleton->getJoint3DPosAt(XN_SKEL_TORSO).x,
+							skeleton->getJoint3DPosAt(XN_SKEL_TORSO).y,
+							skeleton->getJoint3DPosAt(XN_SKEL_TORSO).z,
+							torsoData->getTorsoComps(),
+							torsoData->getShoulderRot(),
+							elbowData->getElbowOpening(),
+							handPos3D.x,
+							handPos3D.y,
+							handPos3D.z,
+							gDataStreamStatus
+							);																				//if tracking is success, we record the data, frame data updates.
 
-							sender.getData()->update(
-								frameData->getFrameID(),
-								frameData->getTimestamp(),
-								frameData->getLShoulderX(),
-								frameData->getLShoulderY(),
-								frameData->getLShoulderZ(),
-								frameData->getRShoulderX(),
-								frameData->getRShoulderY(),
-								frameData->getRShoulderZ(),
-								frameData->getTorsoX(),
-								frameData->getTorsoY(),
-								frameData->getTorsoZ(),
-								frameData->getTorsoComp(),
-								frameData->getShoulderRot(),
-								frameData->getElbowOpen(),
-								frameData->getHandX(),
-								frameData->getHandY(),
-								frameData->getHandZ()
-								);
+						
+						sender.getData()->update(
+							frameData->getFrameID(),
+							frameData->getTimestamp(),
+							frameData->getLShoulderX(),
+							frameData->getLShoulderY(),
+							frameData->getLShoulderZ(),
+							frameData->getRShoulderX(),
+							frameData->getRShoulderY(),
+							frameData->getRShoulderZ(),
+							frameData->getTorsoX(),
+							frameData->getTorsoY(),
+							frameData->getTorsoZ(),
+							frameData->getTorsoComp(),
+							frameData->getShoulderRot(),
+							frameData->getElbowOpen(),
+							frameData->getHandX(),
+							frameData->getHandY(),
+							frameData->getHandZ(),
+							frameData->getStatus()
+							);
+						
+						//receiver.getData()->update( osFrameData->getState() );
 
-							//cout << "The left shoulder pos is : " << frameData->getLShoulderX ()<< ", " << frameData->getLShoulderY() << ", " << frameData->getLShoulderZ() << endl; 
-							//cout << "The right shoulder pos is : " << frameData->getRShoulderX ()<< ", " << frameData->getRShoulderY() << ", " << frameData->getRShoulderZ() << endl; 
+						sender.sendData();
+						//receiver.receiveData();
 
-							sender.sendData();
-		/*				}*/
 						if( archiveData->isArchiving())
 							archiveData->addAFrame(dlg->getFrameData());
 						
@@ -522,6 +539,7 @@ void CMRRKinectDlg::InitKinect() {
 	m_pSkeleton = new KinectSkeletonOpenNI(kinect.getContext(), kinect.getDepthGenerator(), 24);
 	
 	m_pFrameData = new KSFrameData;
+	m_pOSFrameData = new OSFrameData;
 	m_pTracker = new KSHandTrackMeanshiftTracker(nWidth,nHeight);
 	m_pTorsoData = new KSTorsoData;
 	m_pElbowData = new KSElbowData;
@@ -648,7 +666,7 @@ void CMRRKinectDlg::OnBnClickedButtonSetmodel()
 
 	m_pTracker->init( kinect.getRGBImg(), modRect );
 
-	if(gDataStreamStatus == _DS_READY)  gDataStreamStatus = _DS_OPEN;
+	if(gDataStreamStatus == _DS_READY)  gDataStreamStatus = _DS_TRACK;
 	/*DO NOT USE ENDPOINT TRACK
 	m_pHandTrackData->setInit( false );
 	
@@ -670,8 +688,13 @@ void CMRRKinectDlg::OnBnClickedButtonArchive()
 {
 	// TODO: Add your control notification handler code here
 	//if no data, return;
-	if( m_pArchivingData != NULL )
-		m_pArchivingData->setIsArchiving(true);
+	if(gDataStreamStatus == _DS_TRACK )
+	{
+		if( m_pArchivingData != NULL )
+			m_pArchivingData->setIsArchiving(true);
+	}
+	else
+		cout << "Not ready to send data!" << endl;
 }
 
 void CMRRKinectDlg::OnBnClickedButtonEndarchive()
@@ -682,6 +705,8 @@ void CMRRKinectDlg::OnBnClickedButtonEndarchive()
 		m_pArchivingData->saveArchivingData();
 		m_pArchivingData->setIsArchiving(false);
 	}	
+	else
+		cout << "Not ready to send data!" << endl;
 }
 
 void CMRRKinectDlg::OnBnClickedButtonSavecalib()
@@ -715,17 +740,26 @@ void CMRRKinectDlg::OnBnClickedButtonResetcalib()
 void CMRRKinectDlg::OnBnClickedButtonRecord()
 {
 	// TODO: Add your control notification handler code here
-	m_pVideoRecorder->setIsRun( true );
-	m_pVideoRecorder->init();
+	if(gDataStreamStatus == _DS_TRACK )
+	{
+		m_pVideoRecorder->setIsRun( true );
+		m_pVideoRecorder->init();
+	}
+	else
+		cout << "Not ready to send data!" << endl;
 }
 
 
 void CMRRKinectDlg::OnBnClickedButtonRecordEnd()
 {
 	// TODO: Add your control notification handler code here
-	m_pVideoRecorder->close();
-	m_pVideoRecorder->setIsRun( false );
-
+	if(gDataStreamStatus == _DS_TRACK )
+	{
+		m_pVideoRecorder->close();
+		m_pVideoRecorder->setIsRun( false );
+	}
+	else
+		cout << "Not ready to send data!" << endl;
 }
 
 void CMRRKinectDlg::OnBnClickedButtonNewcalib()

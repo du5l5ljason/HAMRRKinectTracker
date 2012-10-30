@@ -53,6 +53,8 @@ private:
 	KSTorsoData*			m_pTorsoData;
 	KSElbowData*			m_pElbowData;
 	KSFrameData*			m_pFrameData;
+	KSFrameDataSender*		m_pSender;
+	//KSFrameDataReceiver*	m_pReceiver;
 	OSFrameData*			m_pOSFrameData;
 	KSArchivingData*		m_pArchivingData;
 	//For test
@@ -77,6 +79,8 @@ public:
 	KSTorsoData*			getTorsoData(){return m_pTorsoData;};
 	KSElbowData*			getElbowData(){return m_pElbowData;};
 	KSFrameData*			getFrameData(){return m_pFrameData;};
+	KSFrameDataSender*		getSender(){return m_pSender;};
+	//KSFrameDataReceiver*	getReceiver(){return m_pReceiver;};
 	OSFrameData*			getOSFrameData(){return m_pOSFrameData;};
 	KSArchivingData*		getArchivingData(){return m_pArchivingData;};
 	//For test
@@ -100,6 +104,8 @@ public:
 		if(m_pElbowData)delete m_pElbowData;
 		if(m_pFrameData)delete m_pFrameData;
 		if(m_pOSFrameData)delete m_pOSFrameData;
+		if(m_pSender)delete m_pSender;
+		//if(m_pReceiver)delete m_pReceiver;
 		if(m_pArchivingData)delete m_pArchivingData;
 	}
 // Dialog Data

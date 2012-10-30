@@ -110,7 +110,7 @@ void KinectCalibration::startCalib(POINT3D* pImgPtSet, DepthGenerator* pDepthGen
 {
 	const char* fileName = _CALIB_FILE_PATH"CalibrationData.txt";
 	if(loadCalibrationDatafromFile(fileName)){
-		cout << "Already have calibration data, load data from file\n" << endl;
+		//cout << "Already have calibration data, load data from file\n" << endl;
 		return;
 	}
 

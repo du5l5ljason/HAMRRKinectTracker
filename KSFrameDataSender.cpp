@@ -38,6 +38,9 @@ void KSFrameDataSender::sendData()
 	m_Server.packBuffer( m_SenderData.getTorsoComp() );
 	m_Server.packBuffer( m_SenderData.getShoulderRot() );
 	m_Server.packBuffer( m_SenderData.getElbowOpen() );
-
+	m_Server.packBuffer( m_SenderData.getHandX() ); 
+	m_Server.packBuffer( m_SenderData.getHandY() ); 
+	m_Server.packBuffer( m_SenderData.getHandZ() ); 
+	m_Server.packBuffer( m_SenderData.getStatus() );
 	m_Server.send();
 }

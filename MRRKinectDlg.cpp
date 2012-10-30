@@ -305,8 +305,6 @@ DWORD WINAPI ShowStreams(LPVOID lpParam) {
 					{
 						fullWnd->showSkeleton(dlg->getSkeleton()->getJointPos());
 					}
-					
-
 					Rect modRect;
 					modRect.x = MODEL_StartX - (int)(MODEL_W/2);
 					modRect.y = MODEL_StartY - (int)(MODEL_H/2);
@@ -340,6 +338,23 @@ DWORD WINAPI ShowStreams(LPVOID lpParam) {
 	return 0;
 }
 
+DWORD WINAPI ReceiveDashProcess(LPVOID lpParam){
+	CMRRKinectDlg* dlg = (CMRRKinectDlg*)(lpParam);
+	KSFrameDataReceiver receiver;
+	OSFrameData* frameData = dlg->getOSFrameData();
+	
+	receiver.openClient();
+
+	while(1)
+	{
+		receiver.receiveData();
+		frameData->setState( receiver.getData()->getState() );
+		cout << "The receiver Data Status is:" << frameData->getState()<< endl;
+	}
+	receiver.closeClient();
+	return 0;
+}
+
 DWORD WINAPI KinectThread(LPVOID lpParam) {
 	CMRRKinectDlg* dlg = (CMRRKinectDlg*)(lpParam);
 	KinectOpenNI* kinect = dlg->getKinect();
@@ -357,14 +372,12 @@ DWORD WINAPI KinectThread(LPVOID lpParam) {
 	double lastFrameTime = 0.0f;
 	double currentFrameTime = 0.0f;
 	int frameID = 0;
-	KSFrameDataSender sender;
-	//Tingfang 10/05
-	KSFrameDataReceiver receiver;
+	KSFrameDataSender* sender = dlg->getSender();
 
-	sender.openServer();
-	//Tingfang 10/05
-	receiver.openClient();
-	//end
+	sender->openServer();
+	//receiver->openClient();
+
+	HANDLE hReceiveDashProcess = CreateThread(NULL, 0, ReceiveDashProcess, dlg, 0, NULL);	
 	while(g_RunKinect) {
 
 		lastFrameTime = currentFrameTime;
@@ -386,7 +399,7 @@ DWORD WINAPI KinectThread(LPVOID lpParam) {
 		}
 
 
-		cout << "System status: " << gnSystemStatus << endl;
+		//cout << "System status: " << gnSystemStatus << endl;
 
 		switch( gnSystemStatus ){
 			case _SS_REST: break;
@@ -418,14 +431,14 @@ DWORD WINAPI KinectThread(LPVOID lpParam) {
 						//UPDATE DATA
 						//------------
 						//1. handData 2. torsoData 3. elbowData 
-						 // handData->update(            
-							//kinect->getRGBImg(),
-							//kinect->getDepthImg(),
-							//handData->getHandPos().x,
-							//handData->getHandPos().y,
-							//handData->getPrevRect().width,                                    //4.12 Can we change the ROI size depending on the tracking performance? if tracking lost, 
-							//handData->getPrevRect().height 
-							//);
+						  handData->update(            
+							kinect->getRGBImg(),
+							kinect->getDepthImg(),
+							handData->getHandPos().x,
+							handData->getHandPos().y,
+							handData->getPrevRect().width,                                    //4.12 Can we change the ROI size depending on the tracking performance? if tracking lost, 
+							handData->getPrevRect().height 
+							);
  
 
 						bool isTorsoUpdated =torsoData->update( kinect->getDepthImg(), skeleton, calib, kinect->getDepthGenerator() );
@@ -440,7 +453,7 @@ DWORD WINAPI KinectThread(LPVOID lpParam) {
 
 						POINT3D handPos3D = calib->cvtIPtoGP(handData->getHandPos(),kinect->getDepthGenerator());
 						//cout << "hand Position:" << handPos3D.x << ", " << handPos3D.y << ", " << handPos3D.z << endl;
-						cout << "dataStreamStatus: " << gDataStreamStatus << endl;
+						//cout << "dataStreamStatus: " << gDataStreamStatus << endl;
 						
 
 						getTimeofDay(&timeStamp, NULL);
@@ -467,7 +480,7 @@ DWORD WINAPI KinectThread(LPVOID lpParam) {
 							);																				//if tracking is success, we record the data, frame data updates.
 
 						
-						sender.getData()->update(
+						sender->getData()->update(
 							frameData->getFrameID(),
 							frameData->getTimestamp(),
 							frameData->getLShoulderX(),
@@ -489,9 +502,10 @@ DWORD WINAPI KinectThread(LPVOID lpParam) {
 							);
 						
 
-						sender.sendData();
-						//receiver.receiveData();
+						sender->sendData();
+						//receiver->receiveData();
 
+						cout << "Sended Status! " << sender->getData()->getStatus() << endl;
 						if( archiveData->isArchiving())
 							archiveData->addAFrame(dlg->getFrameData());
 						
@@ -515,7 +529,7 @@ DWORD WINAPI KinectThread(LPVOID lpParam) {
 		WaitForSingleObject(hShowStreams, INFINITE);
 		getTimeofDay(&timeStamp, NULL);
 		currentFrameTime = timeStamp.tv_sec + (timeStamp.tv_usec/1000000.0);
-		
+		//cout << "THE STATE IS BITCH: " << dlg->getReceiver()->getData()->getState() << endl;
 		//Display Data info
 		CString str;
 		str.Format(_T("%d"), frameID);
@@ -524,8 +538,8 @@ DWORD WINAPI KinectThread(LPVOID lpParam) {
 		dlg->SetDlgItemText(IDC_EDIT5, str);
 
 	}
-	sender.closeServer();
-	receiver.closeClient();
+	sender->closeServer();
+	//receiver->closeClient();
 	return 0;
 }
 
@@ -545,6 +559,8 @@ void CMRRKinectDlg::InitKinect() {
 	m_pElbowData = new KSElbowData;
 	m_pArchivingData = new KSArchivingData;
 	m_pVideoRecorder = new KSUtilsVideoRecorder;
+	m_pSender = new KSFrameDataSender;
+	//m_pReceiver = new KSFrameDataReceiver;
 	//m_pFilter = new KSUtilsMAFilter(2);
 
 	for( int i = 0 ; i < 3 ; ++i )
@@ -558,6 +574,7 @@ void CMRRKinectDlg::InitKinect() {
 	kinect.open();
 
 	g_hKinectThread = CreateThread(NULL, 0, KinectThread, this, 0, NULL);
+
 }
 
 void CMRRKinectDlg::OnBnClickedCancel()
@@ -756,10 +773,11 @@ void CMRRKinectDlg::OnBnClickedButtonRecordEnd()
 	if(gDataStreamStatus == _DS_TRACK )
 	{
 		m_pVideoRecorder->close();
-		m_pVideoRecorder->setIsRun( false );
 	}
 	else
 		cout << "Not ready to send data!" << endl;
+
+	m_pVideoRecorder->setIsRun( false );
 }
 
 void CMRRKinectDlg::OnBnClickedButtonNewcalib()

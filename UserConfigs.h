@@ -76,5 +76,5 @@ enum DATASTREAMSTATUS{
 #define KINECTSERVER "239.110.1.2"
 #define KINECTSERVERPORT 1901     //physical reaching another port at 1502
 
-#define DASHSERVER "239.1.1.2"
+#define DASHSERVER "239.255.42.99"
 #define DASHSERVERPORT 1904

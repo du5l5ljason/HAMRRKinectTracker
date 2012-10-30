@@ -27,10 +27,11 @@ void KSFrameDataReceiver::receiveData()
 	int n = m_Client.read();
 	m_Client.beginUnpack();
 
-	if( n> 0 )
-	{
-		int dashState = m_Client.unpackInt();			
+	//if( n> 0 )
+	//{
+		int dashState = m_Client.unpackInt();	
+
 		//receive data from Optitrak.
 		m_ReceiverData.setState( dashState );
-	}
+	//}
 }

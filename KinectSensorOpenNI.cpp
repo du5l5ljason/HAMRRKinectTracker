@@ -21,6 +21,7 @@ void KinectOpenNI::init(){
 	checkOpenNIError( m_Context.FindExistingNode( XN_NODE_TYPE_DEPTH, m_depthGen ), "Create depth generator" );
 	checkOpenNIError( m_Context.FindExistingNode( XN_NODE_TYPE_IMAGE, m_rgbGen ), "Create image generator" );
 
+	//Open Kinect Motor Control
 
 	//Set Map Output Mode
 	XnMapOutputMode mapMode;

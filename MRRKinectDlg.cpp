@@ -342,7 +342,7 @@ DWORD WINAPI ReceiveDashProcess(LPVOID lpParam){
 	CMRRKinectDlg* dlg = (CMRRKinectDlg*)(lpParam);
 	KSFrameDataReceiver receiver;
 	OSFrameData* frameData = dlg->getOSFrameData();
-	
+	int nControlStatus = 0;
 	receiver.openClient();
 
 	while(1)
@@ -350,6 +350,15 @@ DWORD WINAPI ReceiveDashProcess(LPVOID lpParam){
 		receiver.receiveData();
 		frameData->setState( receiver.getData()->getState() );
 		cout << "The receiver Data Status is:" << frameData->getState()<< endl;
+		nControlStatus = frameData->getState();
+		switch( nControlStatus ){
+		case -1: break;
+		case 1:dlg->OnBnClickedButtonSetmodel();break;
+		case 2:dlg->OnBnClickedButtonRecord();break;
+		case 3:dlg->OnBnClickedButtonRecordEnd();break;
+		case 0:dlg->OnBnClickedCancel();break;
+		default: break;
+		}
 	}
 	receiver.closeClient();
 	return 0;
@@ -431,14 +440,14 @@ DWORD WINAPI KinectThread(LPVOID lpParam) {
 						//UPDATE DATA
 						//------------
 						//1. handData 2. torsoData 3. elbowData 
-						  handData->update(            
-							kinect->getRGBImg(),
-							kinect->getDepthImg(),
-							handData->getHandPos().x,
-							handData->getHandPos().y,
-							handData->getPrevRect().width,                                    //4.12 Can we change the ROI size depending on the tracking performance? if tracking lost, 
-							handData->getPrevRect().height 
-							);
+						 // handData->update(            
+							//kinect->getRGBImg(),
+							//kinect->getDepthImg(),
+							//handData->getHandPos().x,
+							//handData->getHandPos().y,
+							//handData->getPrevRect().width,                                    //4.12 Can we change the ROI size depending on the tracking performance? if tracking lost, 
+							//handData->getPrevRect().height 
+							//);
  
 
 						bool isTorsoUpdated =torsoData->update( kinect->getDepthImg(), skeleton, calib, kinect->getDepthGenerator() );
@@ -505,7 +514,7 @@ DWORD WINAPI KinectThread(LPVOID lpParam) {
 						sender->sendData();
 						//receiver->receiveData();
 
-						cout << "Sended Status! " << sender->getData()->getStatus() << endl;
+						//cout << "Sended Status! " << sender->getData()->getStatus() << endl;
 						if( archiveData->isArchiving())
 							archiveData->addAFrame(dlg->getFrameData());
 						
@@ -513,12 +522,12 @@ DWORD WINAPI KinectThread(LPVOID lpParam) {
 						//DISPLAY DATA
 						//------------
 						CString str;
-						//str.Format(_T("%lf"), dlg->getTorsoData()->getTorsoComps());
-						//dlg->SetDlgItemText(IDC_EDIT12, str);
-						//str.Format(_T("%lf"), dlg->getElbowData()->getElbowOpening());
-						//dlg->SetDlgItemText(IDC_EDIT13, str);
-						//str.Format(_T("%lf"), dlg->getTorsoData()->getShoulderRot());
-						//dlg->SetDlgItemText(IDC_EDIT14, str);
+						str.Format(_T("%lf"), dlg->getTorsoData()->getTorsoComps());
+						dlg->SetDlgItemText(IDC_EDIT12, str);
+						str.Format(_T("%lf"), dlg->getElbowData()->getElbowOpening());
+						dlg->SetDlgItemText(IDC_EDIT13, str);
+						str.Format(_T("%lf"), dlg->getTorsoData()->getShoulderRot());
+						dlg->SetDlgItemText(IDC_EDIT14, str);
 					}
 
 					break;
@@ -660,7 +669,10 @@ void CMRRKinectDlg::OnBnClickedButtonReset()
 
 void CMRRKinectDlg::OnBnClickedButtonSetmodel()
 {
+	cout << "resonsed" << endl;
 	// TODO: Add your control notification handler code here
+	if( gDataStreamStatus == _DS_READY )
+	{
 	POINT3D shoulderCenterPos;
 	shoulderCenterPos.x = (m_pSkeleton->getJointPosAt(XN_SKEL_LEFT_SHOULDER).x + m_pSkeleton->getJointPosAt(XN_SKEL_RIGHT_SHOULDER).x )/2;
 	shoulderCenterPos.y = (m_pSkeleton->getJointPosAt(XN_SKEL_LEFT_SHOULDER).y + m_pSkeleton->getJointPosAt(XN_SKEL_RIGHT_SHOULDER).y )/2;
@@ -683,7 +695,7 @@ void CMRRKinectDlg::OnBnClickedButtonSetmodel()
 
 	m_pTracker->init( kinect.getRGBImg(), modRect );
 
-	if(gDataStreamStatus == _DS_READY)  gDataStreamStatus = _DS_TRACK;
+gDataStreamStatus = _DS_TRACK;
 	/*DO NOT USE ENDPOINT TRACK
 	m_pHandTrackData->setInit( false );
 	
@@ -697,7 +709,9 @@ void CMRRKinectDlg::OnBnClickedButtonSetmodel()
 		m_pTorsoData->setReady(true);
 	if(m_pElbowData!=NULL)
 		m_pElbowData->setReady(true);
- 
+	}
+	else
+		return;
 
 }
 

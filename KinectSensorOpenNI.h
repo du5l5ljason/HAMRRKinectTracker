@@ -7,6 +7,7 @@ private:
 	Context				m_Context;
 	DepthGenerator		m_depthGen;
 	ImageGenerator		m_rgbGen;
+	XN_USB_DEV_HANDLE   m_dev;
 public:
 	Context* getContext() {return &m_Context;};
 	DepthGenerator* getDepthGenerator() {return &m_depthGen;};
@@ -17,4 +18,5 @@ public:
 	void open();
 	void update();
 	void close();
+	bool move( int angle );
 };

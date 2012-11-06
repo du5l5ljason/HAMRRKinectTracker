@@ -1,7 +1,7 @@
 #pragma once
 #include "Buffer.h"
 #include <XnCppWrapper.h>
-
+#include <XnUSB.h>
 using namespace xn;
 
 class KinectSensor

@@ -17,7 +17,7 @@ public:
 
 public:
 	KinectSensor(void):m_rgbImg(NULL), m_depthImg(NULL){};
-	~KinectSensor(void){
+	virtual	~KinectSensor(void){
 		if( m_rgbImg != NULL) delete m_rgbImg;
 		if( m_depthImg != NULL) delete m_depthImg;
 	};

@@ -66,13 +66,7 @@ public:
 		m_prevRect.height = height;
 		m_prevRect.width = width;
 	}
-	~KSHandTrackData(void){
-		if(m_pBG!=NULL)
-			delete m_pBG;
-		if(m_pImgProc!=NULL)
-			delete m_pImgProc;
-		if(m_img!=NULL)
-			delete m_img;
-	};
+	virtual	~KSHandTrackData(void){};
+
 };
 

@@ -27,6 +27,6 @@ public:
 
 	KinectSkeleton(void):m_jointCount(0) {};
 	KinectSkeleton(int count):m_jointCount(count) {};
-	~KinectSkeleton(void){};
+	virtual ~KinectSkeleton(void){};
 };
 
